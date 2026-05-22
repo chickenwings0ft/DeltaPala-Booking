@@ -5,8 +5,8 @@
   let selectedId = '';
   // Usaremos UUIDs de ejemplo. Cuando subas a Supabase, reemplázalos por los UUIDs reales de tu tabla `restaurants`.
   const restaurants = [
-    { id: '11111111-1111-1111-1111-111111111111', name: 'Macheta Logroño' },
-    { id: '22222222-2222-2222-2222-222222222222', name: 'Macheta Haro' }
+    { id: '11111111-1111-1111-1111-111111111111', name: 'Roots Logroño' },
+    { id: '22222222-2222-2222-2222-222222222222', name: 'Roots Haro' }
   ];
 
   onMount(() => {
