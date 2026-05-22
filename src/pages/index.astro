@@ -2,8 +2,14 @@
 import Layout from '../layouts/Layout.astro';
 import BookingWidget from '../components/BookingWidget.svelte';
 
-// ID de restaurante fijo para el MVP (Roots Logroño por defecto)
-const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
+const sede = Astro.url.searchParams.get('sede');
+let RESTAURANT_ID = '11111111-1111-1111-1111-111111111111'; // Por defecto Logroño
+
+if (sede === 'haro') {
+    RESTAURANT_ID = '22222222-2222-2222-2222-222222222222';
+} else if (sede === 'logrono') {
+    RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
+}
 ---
 
 <Layout title="Reservas - Tu Restaurante">
