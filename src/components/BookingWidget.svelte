@@ -214,11 +214,11 @@
       
       if (clientData) {
         clientId = clientData.id;
-        await supabase.from('clients').update({ nombre, telefono, preferencias: alergenos ? {alergenos} : {} }).eq('id', clientId);
+        await supabase.from('clients').update({ nombre, telefono, etiquetas_crm: alergenos ? [alergenos] : [] }).eq('id', clientId);
       } else {
         const { data: newClient, error: insertError } = await supabase
           .from('clients')
-          .insert([{ restaurant_id: restaurantId, nombre, email, telefono, preferencias: alergenos ? {alergenos} : {} }])
+          .insert([{ nombre, email, telefono, etiquetas_crm: alergenos ? [alergenos] : [] }])
           .select()
           .single();
         if (insertError) throw insertError;
