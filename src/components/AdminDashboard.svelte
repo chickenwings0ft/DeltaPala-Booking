@@ -7,7 +7,8 @@
 
   let bookings: any[] = [];
   let loading = true;
-  let selectedDate = new Date().toISOString().split('T')[0];
+  const today = new Date();
+  let selectedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
   let selectedBooking: any = null;
   let subscription: any;
 
@@ -58,7 +59,6 @@
   onMount(() => {
     const savedId = localStorage.getItem('admin_restaurant_id');
     if (savedId) restaurantId = savedId;
-    fetchBookings();
 
     // Suscripción en tiempo real a cambios en reservas
     subscription = supabase
@@ -149,7 +149,9 @@
     }
   }
 
-  $: selectedDate, fetchBookings();
+  $: if (restaurantId !== 'rest-id-placeholder' && selectedDate) {
+    fetchBookings();
+  }
 </script>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto lg:h-[800px] pb-10">
