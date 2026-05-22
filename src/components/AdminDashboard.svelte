@@ -58,6 +58,74 @@
     fetchBookings();
   });
 
+  // Modal de Nueva Reserva Manual
+  let showNewBookingModal = false;
+  let newBooking = {
+    nombre: '',
+    telefono: '',
+    email: '',
+    hora: '14:00',
+    comensales: 2,
+    duration: 90
+  };
+  let savingBooking = false;
+
+  async function createManualBooking() {
+    if (!newBooking.nombre || !newBooking.telefono) {
+      alert("Nombre y teléfono son obligatorios");
+      return;
+    }
+    savingBooking = true;
+    try {
+      // 1. Upsert Client (using phone or email as key is complex, we'll try email if exists, else just insert)
+      let clientId;
+      if (newBooking.email) {
+        const { data: clientData } = await supabase.from('clients').select('id').eq('email', newBooking.email).single();
+        if (clientData) {
+          clientId = clientData.id;
+          await supabase.from('clients').update({ nombre: newBooking.nombre, telefono: newBooking.telefono }).eq('id', clientId);
+        }
+      }
+      
+      if (!clientId) {
+        const { data: newClient, error: clientErr } = await supabase.from('clients')
+          .insert([{ nombre: newBooking.nombre, telefono: newBooking.telefono, email: newBooking.email || null }])
+          .select().single();
+        if (clientErr) throw clientErr;
+        clientId = newClient.id;
+      }
+
+      // Calculate end time
+      const d = new Date(`1970-01-01T${newBooking.hora}:00`);
+      d.setMinutes(d.getMinutes() + newBooking.duration);
+      const endTime = d.toTimeString().slice(0, 5);
+
+      // 2. Insert Booking
+      const { error: bookingErr } = await supabase.from('bookings').insert([{
+        restaurant_id: restaurantId,
+        client_id: clientId,
+        fecha: selectedDate,
+        hora: newBooking.hora,
+        end_time: endTime,
+        comensales: newBooking.comensales,
+        estado: 'reconfirmada', // Admin manual booking is usually confirmed
+        origen: 'telefono'
+      }]);
+
+      if (bookingErr) throw bookingErr;
+      
+      showNewBookingModal = false;
+      newBooking = { nombre: '', telefono: '', email: '', hora: '14:00', comensales: 2, duration: 90 };
+      fetchBookings(); // Refresh
+
+    } catch (err) {
+      console.error(err);
+      alert("Error al crear la reserva");
+    } finally {
+      savingBooking = false;
+    }
+  }
+
   $: selectedDate, fetchBookings();
 </script>
 
@@ -69,7 +137,13 @@
         <CalendarDays class="w-5 h-5 text-gray-500"/>
         Reservas del día
       </h2>
-      <input type="date" bind:value={selectedDate} class="border border-gray-300 rounded-md p-1.5 text-sm focus:ring-2 focus:ring-brand outline-none" />
+      <div class="flex items-center gap-3">
+        <input type="date" bind:value={selectedDate} class="border border-gray-300 rounded-md p-1.5 text-sm focus:ring-2 focus:ring-brand outline-none" />
+        <button on:click={() => showNewBookingModal = true} class="bg-brand text-white px-3 py-1.5 text-sm rounded-lg font-bold hover:bg-brand-hover transition flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Nueva Reserva
+        </button>
+      </div>
     </div>
 
     <div class="flex-1 overflow-y-auto p-2">
@@ -180,3 +254,59 @@
     {/if}
   </div>
 </div>
+
+<!-- Modal Nueva Reserva -->
+{#if showNewBookingModal}
+  <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+      <div class="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50">
+        <h3 class="font-bold text-lg text-gray-900">Nueva Reserva (Admin)</h3>
+        <button on:click={() => showNewBookingModal = false} class="text-gray-400 hover:text-gray-700 transition">
+          <XCircle class="w-6 h-6" />
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">Hora</label>
+            <input type="time" bind:value={newBooking.hora} class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand" />
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">Comensales</label>
+            <input type="number" min="1" bind:value={newBooking.comensales} class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand" />
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1">Nombre Cliente <span class="text-red-500">*</span></label>
+          <input type="text" bind:value={newBooking.nombre} class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand" placeholder="Ej. Juan Pérez" />
+        </div>
+        
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1">Teléfono <span class="text-red-500">*</span></label>
+          <input type="tel" bind:value={newBooking.telefono} class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand" placeholder="600 123 456" />
+        </div>
+        
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1">Email (Opcional)</label>
+          <input type="email" bind:value={newBooking.email} class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand" placeholder="juan@email.com" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-1">Duración (minutos)</label>
+          <input type="number" step="15" bind:value={newBooking.duration} class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand" />
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 bg-gray-50 flex gap-3">
+        <button on:click={() => showNewBookingModal = false} class="flex-1 bg-white border border-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-50 transition">Cancelar</button>
+        <button on:click={createManualBooking} disabled={savingBooking || !newBooking.nombre || !newBooking.telefono} class="flex-1 bg-brand text-white font-bold py-3 rounded-xl hover:bg-brand-hover transition disabled:opacity-50 flex items-center justify-center gap-2">
+          {#if savingBooking}
+            <Loader2 class="w-5 h-5 animate-spin" /> Guardando...
+          {:else}
+            Guardar Reserva
+          {/if}
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
