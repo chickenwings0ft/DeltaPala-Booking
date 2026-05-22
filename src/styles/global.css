@@ -1,15 +1,134 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 @theme {
   --color-brand: #004aad;
   --color-brand-hover: #003680;
-  --color-bg-light: #ffffff;
+  --color-bg-light: #f8f9fc;
 }
 
+/* ─── Base ─────────────────────────────────── */
 body {
   background-color: var(--color-bg-light);
   color: #111827;
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Global transitions ────────────────────── */
+a, button, input, select, textarea {
+  transition: all 200ms ease;
+}
+
+/* ─── Admin title style ─────────────────────── */
+.admin-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+}
+
+/* ─── Toast notification ────────────────────── */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  animation: toastIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  max-width: 360px;
+}
+
+.toast.success { background: #059669; }
+.toast.error   { background: #dc2626; }
+.toast.info    { background: #004aad; }
+.toast.warning { background: #d97706; }
+
+.toast.hide {
+  animation: toastOut 200ms ease forwards;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(80px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to   { opacity: 0; transform: translateX(80px) scale(0.95); }
+}
+
+/* ─── Admin card Art Déco accent ───────────── */
+.admin-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #f0f0f5;
+  border-left: 3px solid var(--color-brand);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
+  transition: box-shadow 200ms ease;
+}
+
+.admin-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+}
+
+/* ─── Table overflow wrapper ────────────────── */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+}
+
+/* ─── Sidebar nav item ──────────────────────── */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #4b5563;
+  text-decoration: none;
+  transition: background 200ms ease, color 200ms ease, transform 150ms ease;
+}
+
+.nav-item:hover {
+  background: #f0f4ff;
+  color: var(--color-brand);
+  transform: translateX(2px);
+}
+
+.nav-item.active {
+  background: #e8f0fe;
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+/* ─── Mobile padding ────────────────────────── */
+@media (max-width: 768px) {
+  main {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
 }

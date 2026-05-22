@@ -112,7 +112,7 @@
           editingEvent.imagen_url = publicUrl;
         } catch (imgErr) {
           console.error("Error subiendo imagen:", imgErr);
-          alert("Hubo un problema subiendo la imagen. Asegúrate de haber ejecutado el SQL para crear el bucket.");
+          if (typeof window !== 'undefined' && window.showToast) window.showToast('Error subiendo la imagen. Comprueba el bucket de Supabase.', 'error');
           processing = false;
           return;
         }
@@ -129,23 +129,26 @@
       }
       
       showModal = false;
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Evento guardado correctamente', 'success');
       fetchEvents();
     } catch (e) {
       console.error(e);
-      alert("Error al guardar el evento.");
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Error al guardar el evento.', 'error');
     } finally {
       processing = false;
     }
   }
 
   async function deleteEvent(id: string) {
-    if (!confirm('¿Estás seguro de que quieres eliminar este evento? Las reservas asociadas también se borrarán.')) return;
+    if (!confirm('¿Estás seguro de que quieres eliminar este evento?')) return;
     try {
       const { error } = await supabase.from('events').delete().eq('id', id);
       if (error) throw error;
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Evento eliminado', 'warning');
       fetchEvents();
     } catch (e) {
       console.error(e);
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Error al eliminar el evento.', 'error');
     }
   }
 
@@ -170,10 +173,9 @@
   }
 
   function copyEventLink(ev: any) {
-    // Generate public link
     const url = `${window.location.origin}/eventos/${ev.id}`;
     navigator.clipboard.writeText(url);
-    alert('¡Enlace de compra copiado al portapapeles! Puedes pegarlo en Instagram o en tu web.');
+    if (typeof window !== 'undefined' && window.showToast) window.showToast('¡Enlace copiado! Pégalo en Instagram o en tu web.', 'info');
   }
 
   onMount(() => {
