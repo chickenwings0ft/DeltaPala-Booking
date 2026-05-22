@@ -107,6 +107,13 @@ import '../../styles/global.css';
             loadingSpinner?.classList.remove('hidden');
 
             try {
+                // BYPASS MODO DEMO PARA TESTEO UI MVP
+                if (emailInput.value === 'admin@demo.com' && passwordInput.value === 'admin123') {
+                    localStorage.setItem('demo_mode', 'true');
+                    window.location.href = '/admin';
+                    return;
+                }
+
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email: emailInput.value,
                     password: passwordInput.value,

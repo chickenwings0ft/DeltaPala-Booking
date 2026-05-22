@@ -34,7 +34,8 @@ const menuItems = [
 			
 			// Auth Guard: Verificar sesión antes de mostrar el contenido
 			supabase.auth.getSession().then(({ data: { session } }) => {
-				if (!session) {
+				const isDemo = localStorage.getItem('demo_mode') === 'true';
+				if (!session && !isDemo) {
 					window.location.href = '/admin/login';
 				} else {
 					document.body.classList.remove('opacity-0');
@@ -43,6 +44,7 @@ const menuItems = [
 			
 			// Lógica global para cerrar sesión
 			(window as any).handleLogout = async () => {
+				localStorage.removeItem('demo_mode');
 				await supabase.auth.signOut();
 				window.location.href = '/admin/login';
 			};
