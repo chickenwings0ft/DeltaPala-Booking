@@ -264,9 +264,15 @@
       <div class="p-4 border-t border-gray-100 bg-gray-50 flex flex-col gap-2">
         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Acciones</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button on:click={() => updateStatus(selectedBooking.id, 'reconfirmada')} class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm py-2.5 rounded-lg font-medium transition">
-            <CheckCircle class="w-4 h-4 shrink-0"/> Reconfirmar
-          </button>
+          {#if selectedBooking.estado === 'pendiente'}
+            <button on:click={() => updateStatus(selectedBooking.id, 'confirmada')} class="flex items-center justify-center gap-2 bg-brand hover:bg-brand-hover text-white text-sm py-2.5 rounded-lg font-medium transition">
+              <CheckCircle class="w-4 h-4 shrink-0"/> Confirmar Reserva
+            </button>
+          {:else}
+            <button on:click={() => updateStatus(selectedBooking.id, 'reconfirmada')} class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm py-2.5 rounded-lg font-medium transition">
+              <CheckCircle class="w-4 h-4 shrink-0"/> Reconfirmar
+            </button>
+          {/if}
           <button on:click={() => updateStatus(selectedBooking.id, 'completada')} class="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm py-2.5 rounded-lg font-medium transition">
             <CheckCircle class="w-4 h-4 shrink-0"/> Completar
           </button>
