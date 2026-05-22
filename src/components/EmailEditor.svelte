@@ -149,7 +149,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           to: testEmail,
-          subject: \`Prueba: \${TEMPLATES.find(t => t.id === selectedTemplateId)?.name}\`,
+          subject: `Prueba: ${TEMPLATES.find(t => t.id === selectedTemplateId)?.name}`,
           html: htmlContent
         })
       });
