@@ -1,0 +1,14 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CancelBooking from '../../components/CancelBooking.svelte';
+
+const { id } = Astro.params;
+---
+
+<Layout title="Cancelar Reserva">
+  <main class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+      <CancelBooking client:load bookingId={id} />
+    </div>
+  </main>
+</Layout>

@@ -40,7 +40,10 @@
     </div>
 
     <hr style="border: none; border-top: 1px solid #eaeaea; margin: 24px 0;" />
-    <p style="color: #6b7280; font-size: 14px; line-height: 1.5; margin: 0;">Si necesitas modificar o cancelar tu reserva, por favor contáctanos lo antes posible.</p>
+    <p style="color: #6b7280; font-size: 14px; line-height: 1.5; margin: 0;">Si tus planes cambian y necesitas cancelar tu reserva, puedes hacerlo haciendo clic en el siguiente enlace:</p>
+    <div style="margin-top: 12px; margin-bottom: 24px;">
+      <a href="https://delta-pala-booking-seven.vercel.app/cancelar/{{booking_id}}" style="background-color: #fce8e8; color: #dc2626; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; font-weight: bold; font-size: 13px; border: 1px solid #fecaca;">Cancelar Reserva</a>
+    </div>
     <p style="color: #6b7280; font-size: 14px; margin-top: 8px;"><em>¡Te esperamos pronto!</em></p>
   </div>
 </div>
@@ -142,7 +145,8 @@
                               .replace(/{{date}}/g, '25/05/2026')
                               .replace(/{{time}}/g, '21:30')
                               .replace(/{{pax}}/g, '4')
-                              .replace(/{{restaurant_name}}/g, 'Tu Restaurante');
+                              .replace(/{{restaurant_name}}/g, 'Tu Restaurante')
+                              .replace(/{{booking_id}}/g, 'test-booking-1234');
 
       const response = await fetch('/api/send-test-email', {
         method: 'POST',
