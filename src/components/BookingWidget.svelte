@@ -140,8 +140,9 @@
 
       if (settings && settings.horarios_apertura) {
         // En Javascript, 0 = Domingo, 1 = Lunes...
-        // Nuestro panel: '1'=Lunes, ..., '6'=Sábado, '0'=Domingo
-        const dateObj = new Date(selectedDate);
+        // Para evitar problemas de zona horaria con UTC, parseamos manualmente a hora local
+        const [y, m, d] = selectedDate.split('-');
+        const dateObj = new Date(Number(y), Number(m) - 1, Number(d));
         const dayOfWeek = dateObj.getDay().toString();
         const configDia = settings.horarios_apertura[dayOfWeek];
 
