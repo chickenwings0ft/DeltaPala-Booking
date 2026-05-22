@@ -59,8 +59,7 @@ export const emailTemplates = {
 
   </div>
 </div>
-  `
-  },
+  `,
 
   cancelacion: `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
