@@ -33,7 +33,10 @@
 
   // Calendar State
   let calDate = new Date();
-  let todayStr = new Date().toISOString().split('T')[0];
+  
+  // Obtener fecha de hoy en zona horaria local, no UTC
+  const today = new Date();
+  let todayStr = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
 
   $: currentMonthStr = calDate.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
   $: calendarDays = generateCalendar(calDate);
@@ -82,7 +85,7 @@
 
   function isDateSelectable(d: Date | null) {
     if (!d) return false;
-    const dStr = d.toISOString().split('T')[0];
+    const dStr = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
     if (dStr < todayStr) return false; // Pasado
 
     const dayOfWeek = d.getDay().toString();
@@ -101,7 +104,7 @@
 
   function selectDate(d: Date | null) {
     if (!d || !isDateSelectable(d)) return;
-    selectedDate = d.toISOString().split('T')[0];
+    selectedDate = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
     selectedTime = '';
     isWaitlist = false;
   }
