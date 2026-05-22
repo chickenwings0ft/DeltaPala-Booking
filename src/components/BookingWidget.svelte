@@ -106,6 +106,21 @@
     isWaitlist = false;
   }
 
+  // Función auxiliar para generar rangos de 30 minutos
+  function generateTimeSlots(openStr: string, closeStr: string) {
+    const slots = [];
+    let current = new Date(`1970-01-01T${openStr}:00`);
+    const end = new Date(`1970-01-01T${closeStr}:00`);
+    
+    while (current < end) {
+      const h = current.getHours().toString().padStart(2, '0');
+      const m = current.getMinutes().toString().padStart(2, '0');
+      slots.push(`${h}:${m}`);
+      current.setMinutes(current.getMinutes() + 30);
+    }
+    return slots;
+  }
+
   async function checkAvailability() {
     if (!selectedDate || !pax) return;
     
@@ -114,26 +129,69 @@
     timeSlots = [];
 
     try {
-      const { data, error } = await supabase.rpc('check_availability', {
-        p_restaurant_id: restaurantId,
-        p_fecha: selectedDate,
-        p_pax: pax
-      });
+      // 1. Obtener la configuración de horarios del restaurante
+      const { data: settings } = await supabase
+        .from('business_settings')
+        .select('horarios_apertura')
+        .eq('restaurant_id', restaurantId)
+        .single();
 
-      if (error) throw error;
-      
-      timeSlots = data || [];
+      let generatedSlots: string[] = [];
+
+      if (settings && settings.horarios_apertura) {
+        // En Javascript, 0 = Domingo, 1 = Lunes...
+        // Nuestro panel: '1'=Lunes, ..., '6'=Sábado, '0'=Domingo
+        const dateObj = new Date(selectedDate);
+        const dayOfWeek = dateObj.getDay().toString();
+        const configDia = settings.horarios_apertura[dayOfWeek];
+
+        if (configDia && configDia.isOpen && configDia.ranges) {
+          configDia.ranges.forEach((r: any) => {
+            generatedSlots.push(...generateTimeSlots(r.open, r.close));
+          });
+        }
+      }
+
+      // Si no hay horarios para ese día (cerrado) o no hay configuración
+      if (generatedSlots.length === 0) {
+        timeSlots = [];
+        return;
+      }
+
+      // 2. Comprobar aforo en Supabase pasando los slots generados
+      // Usaremos una consulta directa ya que actualizaremos la RPC después, 
+      // pero por ahora haremos la lógica en Svelte para el MVP
+      const { data: rooms } = await supabase
+        .from('rooms')
+        .select('capacidad_maxima')
+        .eq('restaurant_id', restaurantId);
+        
+      const maxCap = rooms?.reduce((acc, curr) => acc + (curr.capacidad_maxima || 0), 0) || 50;
+
+      const { data: bookings } = await supabase
+        .from('bookings')
+        .select('hora, comensales')
+        .eq('restaurant_id', restaurantId)
+        .eq('fecha', selectedDate)
+        .neq('estado', 'cancelada');
+
+      // Agrupar reservas por hora
+      const bookedPaxPerSlot: Record<string, number> = {};
+      if (bookings) {
+        bookings.forEach(b => {
+          bookedPaxPerSlot[b.hora] = (bookedPaxPerSlot[b.hora] || 0) + b.comensales;
+        });
+      }
+
+      // Calcular disponibilidad
+      timeSlots = generatedSlots.map(hora => ({
+        hora,
+        disponible: (maxCap - (bookedPaxPerSlot[hora] || 0)) >= pax
+      }));
+
     } catch (err) {
       console.error('Error fetching availability:', err);
-      // Mock slots if RPC fails/doesn't exist
-      timeSlots = [
-        { hora: '13:00', disponible: true },
-        { hora: '13:30', disponible: false },
-        { hora: '14:00', disponible: true },
-        { hora: '14:30', disponible: true },
-        { hora: '20:00', disponible: true },
-        { hora: '21:00', disponible: false }
-      ];
+      timeSlots = [];
     } finally {
       checkingAvailability = false;
     }
