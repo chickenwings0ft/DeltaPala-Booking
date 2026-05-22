@@ -185,6 +185,12 @@
     }
   }
 
+  function calculateEndTime(start: string, duration: number) {
+     const d = new Date(`1970-01-01T${start}:00`);
+     d.setMinutes(d.getMinutes() + duration);
+     return d.toTimeString().slice(0, 5);
+  }
+
   async function handleBooking() {
     isSubmitting = true;
     errorMsg = '';
