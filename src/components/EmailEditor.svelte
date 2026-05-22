@@ -28,12 +28,11 @@
   ];
 
   let selectedTemplateId = 'confirmacion';
-  let plantillas: Record<string, string> = {
-    confirmacion: `
-<h2>¡Tu reserva está confirmada, <strong>{{client_name}}</strong>! 🎉</h2>
+  let defaultConfirmacion = `
+<h2>Tu reserva está confirmada, <strong>{{client_name}}</strong></h2>
 <p>Nos alegra comunicarte que tu mesa en <strong>{{restaurant_name}}</strong> ha sido reservada con éxito.</p>
 <br>
-<h3>📋 Detalles de la Reserva:</h3>
+<h3>Detalles de la Reserva:</h3>
 <ul>
   <li><strong>Fecha:</strong> {{date}}</li>
   <li><strong>Hora:</strong> {{time}}</li>
@@ -43,14 +42,17 @@
 <br>
 <p>Guarda la fecha en tu calendario para no olvidarlo:</p>
 <p>
-  <a href="#" style="background-color: #4285F4; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; margin-right: 8px; font-weight: bold;">📅 Google Calendar</a>
-  <a href="#" style="background-color: #000000; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; margin-right: 8px; font-weight: bold;">🍎 Apple Calendar</a>
-  <a href="#" style="background-color: #000000; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; font-weight: bold;">💳 Apple Wallet (Próximamente)</a>
+  <a href="#" style="background-color: #4285F4; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; margin-right: 8px; font-weight: bold;">Google Calendar</a>
+  <a href="#" style="background-color: #000000; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; margin-right: 8px; font-weight: bold;">Apple Calendar</a>
+  <a href="#" style="background-color: #000000; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; font-weight: bold;">Añadir a Apple Wallet</a>
 </p>
 <br>
 <p>Si necesitas modificar o cancelar tu reserva, por favor contáctanos lo antes posible.</p>
 <p><em>¡Te esperamos pronto!</em></p>
-    `,
+  `;
+
+  let plantillas: Record<string, string> = {
+    confirmacion: defaultConfirmacion,
     cancelacion: 'Hola {{client_name}}, tu reserva ha sido cancelada.',
     recordatorio: 'Hola {{client_name}}, recuerda tu reserva mañana a las {{time}}.'
   };
@@ -70,6 +72,10 @@
 
       if (data && data.plantillas_email && Object.keys(data.plantillas_email).length > 0) {
         plantillas = { ...plantillas, ...data.plantillas_email };
+      }
+
+      if (!plantillas.confirmacion || plantillas.confirmacion.trim() === '') {
+        plantillas.confirmacion = defaultConfirmacion;
       }
     } catch (err) {
       console.error('Error cargando plantillas:', err);
@@ -120,8 +126,9 @@
   function insertVariable(variable: string) {
     if (!quill) return;
     const range = quill.getSelection(true);
-    quill.insertText(range.index, variable, 'bold', true);
-    quill.setSelection(range.index + variable.length, 0);
+    let index = range ? range.index : quill.getLength();
+    quill.insertText(index, variable, 'bold', true);
+    quill.setSelection(index + variable.length, 0);
   }
 
   async function saveSettings() {
@@ -139,11 +146,66 @@
       
       saveSuccess = true;
       setTimeout(() => saveSuccess = false, 3000);
+      
+      // Intentamos mostrar el toast global (inyectado en AdminLayout)
+      if (typeof window !== 'undefined' && window.showToast) {
+        window.showToast('Plantillas guardadas con éxito', 'success');
+      }
     } catch (err) {
       console.error('Error guardando plantillas:', err);
-      alert('Hubo un error al guardar las plantillas.');
+      if (typeof window !== 'undefined' && window.showToast) {
+        window.showToast('Hubo un error al guardar las plantillas.', 'error');
+      } else {
+        alert('Hubo un error al guardar las plantillas.');
+      }
     } finally {
       saving = false;
+    }
+  }
+
+  async function sendTestEmail() {
+    if (!testEmail || !testEmail.includes('@')) {
+      if (window.showToast) window.showToast('Por favor, ingresa un email válido', 'warning');
+      return;
+    }
+    
+    sendingTest = true;
+    try {
+      let htmlContent = plantillas[selectedTemplateId] || '';
+      
+      // Reemplazar variables con datos ficticios para la prueba
+      htmlContent = htmlContent.replace(/{{client_name}}/g, 'Carlos García')
+                              .replace(/{{date}}/g, '25/05/2026')
+                              .replace(/{{time}}/g, '21:30')
+                              .replace(/{{pax}}/g, '4')
+                              .replace(/{{restaurant_name}}/g, 'Tu Restaurante');
+
+      const response = await fetch('/api/send-test-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: testEmail,
+          subject: `Prueba: ${TEMPLATES.find(t => t.id === selectedTemplateId)?.name}`,
+          html: htmlContent
+        })
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Error enviando el correo');
+      }
+      
+      if (window.showToast) window.showToast('Correo de prueba enviado con éxito', 'success');
+    } catch (err: any) {
+      console.error('Error al enviar prueba:', err);
+      if (window.showToast) {
+        window.showToast(err.message, 'error');
+      } else {
+        alert(err.message);
+      }
+    } finally {
+      sendingTest = false;
     }
   }
 
@@ -243,6 +305,31 @@
           </div>
           <!-- Contenedor para Quill -->
           <div bind:this={editorContainer}></div>
+
+          <!-- Enviar Prueba -->
+          <div class="mt-6 border-t border-gray-100 pt-6">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Enviar Prueba</h3>
+            <div class="flex gap-3">
+              <input 
+                type="email" 
+                bind:value={testEmail} 
+                placeholder="tu@email.com" 
+                class="flex-1 bg-white border border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-brand focus:border-brand block p-2.5"
+              />
+              <button 
+                on:click={sendTestEmail} 
+                disabled={sendingTest || !testEmail}
+                class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2.5 rounded-lg font-medium transition disabled:opacity-50"
+              >
+                {#if sendingTest}
+                  <Loader2 class="w-4 h-4 animate-spin" /> Enviando...
+                {:else}
+                  <Mail class="w-4 h-4" /> Enviar Prueba
+                {/if}
+              </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">Se enviará el correo con datos ficticios para que veas cómo luce.</p>
+          </div>
         </div>
       </div>
     {/if}

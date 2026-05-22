@@ -21,6 +21,7 @@
     "konva": "^10.3.0",
     "lucide-svelte": "^1.0.1",
     "quill": "^2.0.3",
+    "resend": "^6.12.3",
     "svelte": "^5.55.9",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3"
