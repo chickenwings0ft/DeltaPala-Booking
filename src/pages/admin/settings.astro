@@ -1,7 +1,6 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import FormConfigEditor from '../../components/FormConfigEditor.svelte';
-import SpecialDaysConfig from '../../components/SpecialDaysConfig.svelte';
 
 // Usaremos un ID de restaurante por defecto para el MVP
 const RESTAURANT_ID = '00000000-0000-0000-0000-000000000000';
@@ -15,9 +14,6 @@ const RESTAURANT_ID = '00000000-0000-0000-0000-000000000000';
 		</div>
 
 		<div class="space-y-8">
-			<!-- Días Especiales (Cierres por vacaciones, etc.) -->
-			<SpecialDaysConfig client:only="svelte" restaurantId={RESTAURANT_ID} />
-
 			<!-- Configuración del Formulario -->
 			<FormConfigEditor client:only="svelte" restaurantId={RESTAURANT_ID} />
 		</div>
