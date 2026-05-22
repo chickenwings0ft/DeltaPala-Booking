@@ -20,6 +20,7 @@
   let soldOut = false;
   let remaining = 0;
   let errorMsg = '';
+  let showImageModal = false;
 
   async function loadEvent() {
     if (!eventId) return;
@@ -108,21 +109,29 @@
 {:else}
   <div class="bg-white shadow-2xl rounded-2xl overflow-hidden max-w-4xl mx-auto flex flex-col md:flex-row">
     <!-- Image & Details Side -->
-    <div class="w-full md:w-5/12 bg-gray-900 text-white relative">
+    <div class="w-full md:w-5/12 bg-gray-900 text-white flex flex-col relative overflow-hidden">
       {#if event.imagen_url}
-        <div class="absolute inset-0 opacity-40">
-          <img src={event.imagen_url} alt={event.titulo} class="w-full h-full object-cover" />
+        <div class="relative h-48 w-full group overflow-hidden">
+          <img src={event.imagen_url} alt={event.titulo} class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <div class="absolute inset-0 bg-gray-900/20 group-hover:bg-gray-900/10 transition"></div>
+          <button 
+            on:click={() => showImageModal = true}
+            class="absolute bottom-3 right-3 bg-black/60 hover:bg-black text-white text-xs font-bold px-3 py-1.5 rounded-lg backdrop-blur-sm transition flex items-center gap-1.5"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+            Ver cartel
+          </button>
         </div>
       {/if}
-      <div class="relative p-8 h-full flex flex-col z-10 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent">
-        <div class="mt-auto">
+      <div class="p-8 flex-1 flex flex-col z-10 bg-gray-900">
+        <div>
           <div class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4" style="background-color: {event.color_evento}; color: white;">
             Evento Especial
           </div>
           <h2 class="text-3xl font-bold mb-4">{event.titulo}</h2>
-          <p class="text-gray-300 text-sm mb-6 line-clamp-3">{event.descripcion}</p>
+          <p class="text-gray-300 text-sm mb-8 leading-relaxed">{event.descripcion}</p>
           
-          <div class="space-y-3 font-medium">
+          <div class="space-y-4 font-medium bg-white/10 p-5 rounded-2xl border border-white/5">
             <div class="flex items-center gap-3">
               <CalendarDays class="w-5 h-5 text-gray-400"/>
               {new Date(event.fecha).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long'})}
@@ -272,4 +281,17 @@
       {/if}
     </div>
   </div>
+
+  <!-- Modal Foto Expandida -->
+  {#if showImageModal && event.imagen_url}
+    <div class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
+      <button 
+        on:click={() => showImageModal = false} 
+        class="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition"
+      >
+        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+      <img src={event.imagen_url} alt={event.titulo} class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" />
+    </div>
+  {/if}
 {/if}
