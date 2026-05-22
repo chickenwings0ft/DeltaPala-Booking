@@ -41,11 +41,12 @@
       const firstDay = new Date(year, month, 1).toISOString().split('T')[0];
       const lastDay = new Date(year, month + 1, 0).toISOString().split('T')[0];
 
-      // 1. Cargar Salas para Capacidad Máxima
-      const { data: rooms } = await supabase.from('rooms').select('capacidad_maxima').eq('restaurant_id', restaurantId);
-      if (rooms && rooms.length > 0) {
-        maxDailyCapacity = rooms.reduce((acc, curr) => acc + (curr.capacidad_maxima || 0), 0);
-        if (maxDailyCapacity === 0) maxDailyCapacity = 50; // Fallback seguro
+      // 1. Cargar Aforo Máximo Diario desde Turnos
+      const { data: shifts } = await supabase.from('shifts').select('default_capacity').eq('restaurant_id', restaurantId);
+      if (shifts && shifts.length > 0) {
+        maxDailyCapacity = shifts.reduce((acc, curr) => acc + (curr.default_capacity || 0), 0);
+      } else {
+        maxDailyCapacity = 50; // Fallback seguro
       }
 
       // 2. Cargar Settings (Días especiales y horarios)
