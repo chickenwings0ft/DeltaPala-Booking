@@ -31,32 +31,81 @@
 
   let selectedTemplateId = 'confirmacion';
   let defaultConfirmacion = `
-<h2>Tu reserva está confirmada, <strong>{{client_name}}</strong></h2>
-<p>Nos alegra comunicarte que tu mesa en <strong>{{restaurant_name}}</strong> ha sido reservada con éxito.</p>
-<br>
-<h3>Detalles de la Reserva:</h3>
-<ul>
-  <li><strong>Fecha:</strong> {{date}}</li>
-  <li><strong>Hora:</strong> {{time}}</li>
-  <li><strong>Comensales:</strong> {{pax}} personas</li>
-  <li><strong>Lugar:</strong> {{restaurant_name}}</li>
-</ul>
-<br>
-<p>Guarda la fecha en tu calendario para no olvidarlo:</p>
-<p>
-  <a href="#" style="background-color: #4285F4; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; margin-right: 8px; font-weight: bold;">Google Calendar</a>
-  <a href="#" style="background-color: #000000; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; margin-right: 8px; font-weight: bold;">Apple Calendar</a>
-  <a href="#" style="background-color: #000000; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; font-weight: bold;">Añadir a Apple Wallet</a>
-</p>
-<br>
-<p>Si necesitas modificar o cancelar tu reserva, por favor contáctanos lo antes posible.</p>
-<p><em>¡Te esperamos pronto!</em></p>
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
+  <div style="background-color: #004aad; padding: 24px; text-align: center;">
+    <img src="https://delta-pala-booking-seven.vercel.app/assets/logo-pequeno.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%; background-color: white; padding: 4px;" />
+  </div>
+  <div style="padding: 32px 24px;">
+    <h2 style="color: #111827; margin-top: 0; font-size: 22px;">Reserva confirmada, <strong>{{client_name}}</strong></h2>
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Nos alegra comunicarte que tu mesa en <strong>{{restaurant_name}}</strong> ha sido reservada con éxito.</p>
+    
+    <div style="background-color: #f8f9fc; border-left: 4px solid #004aad; padding: 16px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+      <h3 style="margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; color: #6b7280; letter-spacing: 1px;">Detalles de la Reserva</h3>
+      <ul style="list-style: none; padding: 0; margin: 0; color: #111827;">
+        <li style="margin-bottom: 8px;"><strong>Fecha:</strong> {{date}}</li>
+        <li style="margin-bottom: 8px;"><strong>Hora:</strong> {{time}}</li>
+        <li style="margin-bottom: 8px;"><strong>Comensales:</strong> {{pax}} personas</li>
+        <li style="margin-bottom: 0;"><strong>Lugar:</strong> {{restaurant_name}}</li>
+      </ul>
+    </div>
+
+    <p style="color: #4b5563; font-size: 16px;">Guarda la fecha en tu calendario para no olvidarlo:</p>
+    <div style="margin-top: 16px; margin-bottom: 24px;">
+      <a href="#" style="background-color: #004aad; color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; display: inline-block; margin-right: 8px; font-weight: bold; font-size: 14px;">Google Calendar</a>
+      <a href="#" style="background-color: #111827; color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; display: inline-block; font-weight: bold; font-size: 14px;">Apple Calendar</a>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #eaeaea; margin: 24px 0;" />
+    <p style="color: #6b7280; font-size: 14px; line-height: 1.5; margin: 0;">Si necesitas modificar o cancelar tu reserva, por favor contáctanos lo antes posible.</p>
+    <p style="color: #6b7280; font-size: 14px; margin-top: 8px;"><em>¡Te esperamos pronto!</em></p>
+  </div>
+</div>
+  `;
+
+  let defaultCancelacion = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
+  <div style="background-color: #dc2626; padding: 24px; text-align: center;">
+    <img src="https://delta-pala-booking-seven.vercel.app/assets/logo-pequeno.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%; background-color: white; padding: 4px;" />
+  </div>
+  <div style="padding: 32px 24px;">
+    <h2 style="color: #111827; margin-top: 0; font-size: 22px;">Reserva Cancelada</h2>
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Hola <strong>{{client_name}}</strong>,</p>
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Te confirmamos que tu reserva en <strong>{{restaurant_name}}</strong> para el día {{date}} a las {{time}} ha sido cancelada correctamente.</p>
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Esperamos poder atenderte en otra ocasión.</p>
+    <div style="margin-top: 32px; text-align: center;">
+      <a href="#" style="background-color: #004aad; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; font-weight: bold; font-size: 14px;">Hacer una nueva reserva</a>
+    </div>
+  </div>
+</div>
+  `;
+
+  let defaultRecordatorio = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
+  <div style="background-color: #004aad; padding: 24px; text-align: center;">
+    <img src="https://delta-pala-booking-seven.vercel.app/assets/logo-pequeno.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%; background-color: white; padding: 4px;" />
+  </div>
+  <div style="padding: 32px 24px;">
+    <h2 style="color: #111827; margin-top: 0; font-size: 22px;">Recordatorio de Reserva</h2>
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Hola <strong>{{client_name}}</strong>, ¡te esperamos muy pronto!</p>
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Este es un recordatorio de tu reserva en <strong>{{restaurant_name}}</strong> para mañana.</p>
+    
+    <div style="background-color: #f8f9fc; border-left: 4px solid #004aad; padding: 16px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+      <ul style="list-style: none; padding: 0; margin: 0; color: #111827;">
+        <li style="margin-bottom: 8px;"><strong>Fecha:</strong> {{date}}</li>
+        <li style="margin-bottom: 8px;"><strong>Hora:</strong> {{time}}</li>
+        <li style="margin-bottom: 0;"><strong>Comensales:</strong> {{pax}} personas</li>
+      </ul>
+    </div>
+    
+    <p style="color: #6b7280; font-size: 14px; line-height: 1.5; margin: 0;">Te pedimos puntualidad. Si surge algún imprevisto, avísanos con antelación.</p>
+  </div>
+</div>
   `;
 
   let plantillas: Record<string, string> = {
     confirmacion: defaultConfirmacion,
-    cancelacion: 'Hola {{client_name}}, tu reserva ha sido cancelada.',
-    recordatorio: 'Hola {{client_name}}, recuerda tu reserva mañana a las {{time}}.'
+    cancelacion: defaultCancelacion,
+    recordatorio: defaultRecordatorio
   };
 
   async function loadSettings() {
@@ -78,6 +127,12 @@
 
       if (!plantillas.confirmacion || plantillas.confirmacion.trim() === '') {
         plantillas.confirmacion = defaultConfirmacion;
+      }
+      if (!plantillas.cancelacion || plantillas.cancelacion.trim() === '') {
+        plantillas.cancelacion = defaultCancelacion;
+      }
+      if (!plantillas.recordatorio || plantillas.recordatorio.trim() === '') {
+        plantillas.recordatorio = defaultRecordatorio;
       }
     } catch (err) {
       console.error('Error cargando plantillas:', err);
