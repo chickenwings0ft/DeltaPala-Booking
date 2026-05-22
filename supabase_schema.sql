@@ -182,7 +182,7 @@ BEGIN
       AND fecha = p_fecha
       AND estado != 'cancelada'
       AND hora < v_end_time
-      AND end_time > p_hora;
+      AND COALESCE(end_time, hora + (v_shift.duration_minutes || ' minutes')::INTERVAL) > p_hora;
 
     -- 4. Devolver si hay plazas suficientes
     RETURN (v_capacity - v_overlapping_pax) >= p_pax;
