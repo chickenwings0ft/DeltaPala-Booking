@@ -111,26 +111,20 @@
         <Loader2 class="w-8 h-8 animate-spin text-brand" />
       </div>
     {:else}
-      <div class="space-y-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
         {#each DIAS as dia}
-          <div class="flex items-center gap-4 p-4 rounded-lg border {horarios[dia.id].isOpen ? 'border-brand/20 bg-blue-50/30' : 'border-gray-100 bg-gray-50/50'} transition-colors">
-            <!-- Toggle Abierto/Cerrado -->
-            <div class="w-40 flex items-center gap-3">
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" bind:checked={horarios[dia.id].isOpen} class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand"></div>
-              </label>
-              <span class="font-medium text-gray-700 {horarios[dia.id].isOpen ? 'text-gray-900' : 'text-gray-400'}">{dia.nombre}</span>
-            </div>
-
-            <!-- Estado -->
-            <div class="flex-1 flex items-center">
-              {#if horarios[dia.id].isOpen}
-                <span class="text-sm font-bold text-brand">Abierto</span>
-              {:else}
-                <span class="text-sm font-medium text-red-500">Cerrado</span>
-              {/if}
-            </div>
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <div 
+            class="flex flex-col items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer select-none {horarios[dia.id].isOpen ? 'border-brand/30 bg-blue-50/40 shadow-sm' : 'border-gray-100 bg-gray-50/50 hover:border-gray-200'}"
+            on:click={() => horarios[dia.id].isOpen = !horarios[dia.id].isOpen}
+          >
+            <span class="font-bold text-sm uppercase tracking-wider {horarios[dia.id].isOpen ? 'text-brand' : 'text-gray-400'}">{dia.nombre.substring(0, 3)}</span>
+            
+            <label class="relative inline-flex items-center cursor-pointer pointer-events-none">
+              <input type="checkbox" bind:checked={horarios[dia.id].isOpen} class="sr-only peer">
+              <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand"></div>
+            </label>
           </div>
         {/each}
       </div>
