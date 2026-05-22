@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { supabase } from '../lib/supabase';
   import { Clock, User, Phone, CheckCircle, Trash2, Loader2, Calendar as CalendarIcon } from 'lucide-svelte';
 
@@ -7,6 +7,7 @@
 
   let waitlist: any[] = [];
   let loading = true;
+  let subscription: any;
 
   async function loadWaitlist() {
     loading = true;
@@ -60,6 +61,24 @@
     const savedId = localStorage.getItem('admin_restaurant_id');
     if (savedId) restaurantId = savedId;
     loadWaitlist();
+
+    subscription = supabase
+      .channel('waitlist-manager')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'waitlist',
+        filter: `restaurant_id=eq.${restaurantId}` 
+      }, () => {
+        loadWaitlist();
+      })
+      .subscribe();
+  });
+
+  onDestroy(() => {
+    if (subscription) {
+      supabase.removeChannel(subscription);
+    }
   });
 </script>
 

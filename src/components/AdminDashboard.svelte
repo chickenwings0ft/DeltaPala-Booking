@@ -68,15 +68,9 @@
         schema: 'public', 
         table: 'bookings',
         filter: `restaurant_id=eq.${restaurantId}` 
-      }, (payload) => {
-        // Solo refrescar si el cambio afecta al día seleccionado
-        const affectsCurrentDate = 
-          (payload.new && payload.new.fecha === selectedDate) || 
-          (payload.old && payload.old.fecha === selectedDate);
-          
-        if (affectsCurrentDate) {
-          fetchBookings();
-        }
+      }, () => {
+        // Al recibir cualquier cambio de este restaurante, recargamos
+        fetchBookings();
       })
       .subscribe();
   });
