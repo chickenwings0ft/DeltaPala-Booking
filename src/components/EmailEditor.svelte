@@ -1,19 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { supabase } from '../lib/supabase';
-  import Quill from 'quill';
-  import 'quill/dist/quill.snow.css';
-  import { Save, Loader2, Mail } from 'lucide-svelte';
+  import { Loader2, Mail } from 'lucide-svelte';
 
   export let restaurantId: string = '00000000-0000-0000-0000-000000000000';
-
-  let editorContainer: HTMLElement;
-  let quill: Quill;
-  let loading = true;
-  let saving = false;
-  let saveSuccess = false;
-  let testEmail = '';
-  let sendingTest = false;
 
   const TEMPLATES = [
     { id: 'confirmacion', name: 'Confirmación de Reserva' },
@@ -22,15 +12,8 @@
     { id: 'lista_espera', name: 'Aviso Lista de Espera' },
   ];
 
-  const VARIABLES = [
-    { id: '{{client_name}}', label: 'Nombre Cliente' },
-    { id: '{{date}}', label: 'Fecha' },
-    { id: '{{time}}', label: 'Hora' },
-    { id: '{{pax}}', label: 'Comensales' },
-    { id: '{{restaurant_name}}', label: 'Nombre Restaurante' },
-  ];
-
   let selectedTemplateId = 'confirmacion';
+
   let defaultConfirmacion = `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
   <div style="background-color: #004aad; padding: 24px; text-align: center;">
@@ -137,124 +120,16 @@
     lista_espera: defaultListaEspera
   };
 
-  async function loadSettings() {
-    loading = true;
-    try {
-      const { data, error } = await supabase
-        .from('business_settings')
-        .select('plantillas_email')
-        .eq('restaurant_id', restaurantId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-
-      if (data && data.plantillas_email && Object.keys(data.plantillas_email).length > 0) {
-        plantillas = { ...plantillas, ...data.plantillas_email };
-      }
-
-      if (!plantillas.confirmacion || plantillas.confirmacion.trim() === '') {
-        plantillas.confirmacion = defaultConfirmacion;
-      }
-      if (!plantillas.cancelacion || plantillas.cancelacion.trim() === '') {
-        plantillas.cancelacion = defaultCancelacion;
-      }
-      if (!plantillas.recordatorio || plantillas.recordatorio.trim() === '') {
-        plantillas.recordatorio = defaultRecordatorio;
-      }
-      if (!plantillas.lista_espera || plantillas.lista_espera.trim() === '') {
-        plantillas.lista_espera = defaultListaEspera;
-      }
-    } catch (err) {
-      console.error('Error cargando plantillas:', err);
-    } finally {
-      loading = false;
-      initEditor();
-    }
-  }
-
-  function initEditor() {
-    if (quill) {
-      // Si ya está inicializado, solo actualizamos el contenido
-      quill.root.innerHTML = plantillas[selectedTemplateId] || '';
-      return;
-    }
-
-    // Inicializar Quill
-    quill = new Quill(editorContainer, {
-      theme: 'snow',
-      modules: {
-        toolbar: [
-          [{ 'header': [1, 2, 3, false] }],
-          ['bold', 'italic', 'underline', 'strike'],
-          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-          [{ 'color': [] }, { 'background': [] }],
-          ['link'],
-          ['clean']
-        ]
-      },
-      placeholder: 'Escribe aquí tu plantilla de correo...'
-    });
-
-    quill.root.innerHTML = plantillas[selectedTemplateId] || '';
-
-    // Escuchar cambios para actualizar el state
-    quill.on('text-change', () => {
-      plantillas[selectedTemplateId] = quill.root.innerHTML;
-    });
-  }
-
   function changeTemplate(id: string) {
     selectedTemplateId = id;
-    if (quill) {
-      quill.root.innerHTML = plantillas[selectedTemplateId] || '';
-    }
   }
 
-  function insertVariable(variable: string) {
-    if (!quill) return;
-    const range = quill.getSelection(true);
-    let index = range ? range.index : quill.getLength();
-    quill.insertText(index, variable, 'bold', true);
-    quill.setSelection(index + variable.length, 0);
-  }
-
-  async function saveSettings() {
-    saving = true;
-    saveSuccess = false;
-    try {
-      const { error } = await supabase
-        .from('business_settings')
-        .upsert({ 
-          restaurant_id: restaurantId, 
-          plantillas_email: plantillas 
-        }, { onConflict: 'restaurant_id' });
-
-      if (error) throw error;
-      
-      saveSuccess = true;
-      setTimeout(() => saveSuccess = false, 3000);
-      
-      // Intentamos mostrar el toast global (inyectado en AdminLayout)
-      if (typeof window !== 'undefined' && window.showToast) {
-        window.showToast('Plantillas guardadas con éxito', 'success');
-      }
-    } catch (err) {
-      console.error('Error guardando plantillas:', err);
-      if (typeof window !== 'undefined' && window.showToast) {
-        window.showToast('Hubo un error al guardar las plantillas.', 'error');
-      } else {
-        alert('Hubo un error al guardar las plantillas.');
-      }
-    } finally {
-      saving = false;
-    }
-  }
+  let sendingTest = false;
+  let testEmail = '';
 
   async function sendTestEmail() {
     if (!testEmail || !testEmail.includes('@')) {
-      if (window.showToast) window.showToast('Por favor, ingresa un email válido', 'warning');
+      if (typeof window !== 'undefined' && (window as any).showToast) (window as any).showToast('Por favor, ingresa un email válido', 'warning');
       return;
     }
     
@@ -274,7 +149,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           to: testEmail,
-          subject: `Prueba: ${TEMPLATES.find(t => t.id === selectedTemplateId)?.name}`,
+          subject: \`Prueba: \${TEMPLATES.find(t => t.id === selectedTemplateId)?.name}\`,
           html: htmlContent
         })
       });
@@ -285,11 +160,11 @@
         throw new Error(result.error || 'Error enviando el correo');
       }
       
-      if (window.showToast) window.showToast('Correo de prueba enviado con éxito', 'success');
+      if (typeof window !== 'undefined' && (window as any).showToast) (window as any).showToast('Correo de prueba enviado con éxito', 'success');
     } catch (err: any) {
       console.error('Error al enviar prueba:', err);
-      if (window.showToast) {
-        window.showToast(err.message, 'error');
+      if (typeof window !== 'undefined' && (window as any).showToast) {
+        (window as any).showToast(err.message, 'error');
       } else {
         alert(err.message);
       }
@@ -298,153 +173,75 @@
     }
   }
 
-  function resetToDefault() {
-    if (confirm('¿Estás seguro? Esto reemplazará tu texto actual con el diseño premium por defecto.')) {
-      const defaults: Record<string, string> = {
-        confirmacion: defaultConfirmacion,
-        cancelacion: defaultCancelacion,
-        recordatorio: defaultRecordatorio,
-        lista_espera: defaultListaEspera
-      };
-      plantillas[selectedTemplateId] = defaults[selectedTemplateId];
-      if (quill) {
-        quill.root.innerHTML = plantillas[selectedTemplateId];
-      }
-    }
-  }
-
   onMount(() => {
     const savedId = localStorage.getItem('admin_restaurant_id');
     if (savedId) restaurantId = savedId;
-    loadSettings();
   });
 </script>
-
-<style>
-  /* Personalización para adaptar Quill a nuestro diseño Tailwind */
-  :global(.ql-toolbar.ql-snow) {
-    border-color: #f3f4f6 !important;
-    border-top-left-radius: 0.5rem;
-    border-top-right-radius: 0.5rem;
-    background-color: #f9fafb;
-    padding: 12px !important;
-  }
-  :global(.ql-container.ql-snow) {
-    border-color: #f3f4f6 !important;
-    border-bottom-left-radius: 0.5rem;
-    border-bottom-right-radius: 0.5rem;
-    min-height: 250px;
-    font-size: 1rem;
-    font-family: inherit;
-  }
-  :global(.ql-editor) {
-    padding: 1.5rem !important;
-  }
-</style>
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
   <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
     <div>
       <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
         <Mail class="w-5 h-5 text-brand" />
-        Plantillas de Email
+        Plantillas de Email Automáticas
       </h2>
-      <p class="text-sm text-gray-500 mt-1">Personaliza los correos que reciben tus clientes.</p>
-    </div>
-    <div class="flex gap-2">
-      <button 
-        on:click={resetToDefault} 
-        disabled={loading}
-        class="text-sm bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition"
-      >
-        Restaurar Diseño Premium
-      </button>
-      <button 
-        on:click={saveSettings} 
-        disabled={saving || loading}
-        class="flex items-center gap-2 bg-brand text-white px-4 py-2 rounded-lg font-medium hover:bg-brand-hover transition disabled:opacity-50"
-      >
-      {#if saving}
-        <Loader2 class="w-4 h-4 animate-spin" /> Guardando...
-      {:else if saveSuccess}
-        <span class="text-green-300">¡Guardado!</span>
-      {:else}
-        <Save class="w-4 h-4" /> Guardar Cambios
-      {/if}
-      </button>
+      <p class="text-sm text-gray-500 mt-1">Tus comunicaciones ya tienen un diseño premium corporativo integrado.</p>
     </div>
   </div>
 
   <div class="p-6">
-    {#if loading}
-      <div class="flex justify-center py-12">
-        <Loader2 class="w-8 h-8 animate-spin text-brand" />
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <!-- Selector de Plantillas -->
+      <div class="lg:col-span-1 space-y-2">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Tipo de Email</h3>
+        {#each TEMPLATES as template}
+          <button 
+            on:click={() => changeTemplate(template.id)}
+            class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors border {selectedTemplateId === template.id ? 'bg-blue-50 border-brand/30 text-brand' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}"
+          >
+            {template.name}
+          </button>
+        {/each}
       </div>
-    {:else}
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- Selector de Plantillas -->
-        <div class="lg:col-span-1 space-y-2">
-          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Tipo de Email</h3>
-          {#each TEMPLATES as template}
+
+      <!-- Preview Box -->
+      <div class="lg:col-span-3">
+        <div class="mb-4">
+          <h3 class="text-sm font-medium text-gray-700">Diseño predefinido (Solo visualización)</h3>
+          <p class="text-xs text-gray-400 mt-1">Hemos configurado automáticamente un diseño premium para todos los correos. No necesitas editar nada.</p>
+        </div>
+        
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 min-h-[300px] flex items-center justify-center overflow-auto shadow-inner">
+          <div class="w-full pointer-events-none">
+            {@html plantillas[selectedTemplateId]}
+          </div>
+        </div>
+
+        <!-- Enviar Prueba -->
+        <div class="mt-6 border-t border-gray-100 pt-6">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Enviar Prueba a mi Correo</h3>
+          <div class="flex gap-3">
+            <input 
+              type="email" 
+              bind:value={testEmail} 
+              placeholder="tu@email.com" 
+              class="flex-1 bg-white border border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-2 focus:ring-brand focus:border-brand block p-2.5 outline-none"
+            />
             <button 
-              on:click={() => changeTemplate(template.id)}
-              class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors border {selectedTemplateId === template.id ? 'bg-blue-50 border-brand/30 text-brand' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}"
+              on:click={sendTestEmail} 
+              disabled={sendingTest || !testEmail}
+              class="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-5 py-2.5 rounded-lg font-bold transition disabled:opacity-50"
             >
-              {template.name}
+              {#if sendingTest}
+                <Loader2 class="w-4 h-4 animate-spin" /> Enviando...
+              {:else}
+                <Mail class="w-4 h-4" /> Enviar Prueba
+              {/if}
             </button>
-          {/each}
-          
-          <div class="pt-6">
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Variables Dinámicas</h3>
-            <p class="text-xs text-gray-500 mb-3">Haz clic para insertar en el texto:</p>
-            <div class="flex flex-wrap gap-2">
-              {#each VARIABLES as v}
-                <button 
-                  on:click={() => insertVariable(v.id)}
-                  class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded border border-gray-200 transition"
-                >
-                  {v.label}
-                </button>
-              {/each}
-            </div>
-          </div>
-        </div>
-
-        <!-- Editor Rich Text -->
-        <div class="lg:col-span-3">
-          <div class="mb-2 flex justify-between items-end">
-            <h3 class="text-sm font-medium text-gray-700">Contenido del correo</h3>
-            <span class="text-xs text-gray-400">El formato HTML se guardará automáticamente</span>
-          </div>
-          <!-- Contenedor para Quill -->
-          <div bind:this={editorContainer}></div>
-
-          <!-- Enviar Prueba -->
-          <div class="mt-6 border-t border-gray-100 pt-6">
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Enviar Prueba</h3>
-            <div class="flex gap-3">
-              <input 
-                type="email" 
-                bind:value={testEmail} 
-                placeholder="tu@email.com" 
-                class="flex-1 bg-white border border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-brand focus:border-brand block p-2.5"
-              />
-              <button 
-                on:click={sendTestEmail} 
-                disabled={sendingTest || !testEmail}
-                class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2.5 rounded-lg font-medium transition disabled:opacity-50"
-              >
-                {#if sendingTest}
-                  <Loader2 class="w-4 h-4 animate-spin" /> Enviando...
-                {:else}
-                  <Mail class="w-4 h-4" /> Enviar Prueba
-                {/if}
-              </button>
-            </div>
-            <p class="text-xs text-gray-500 mt-2">Se enviará el correo con datos ficticios para que veas cómo luce.</p>
           </div>
         </div>
       </div>
-    {/if}
+    </div>
   </div>
 </div>
