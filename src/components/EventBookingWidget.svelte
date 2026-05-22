@@ -108,32 +108,37 @@
 {:else}
   <div class="bg-white shadow-2xl rounded-2xl overflow-hidden max-w-4xl mx-auto flex flex-col md:flex-row">
     <!-- Image & Details Side -->
-    <div class="w-full md:w-5/12 bg-gray-900 text-white flex flex-col">
+    <div class="w-full md:w-5/12 bg-gray-900 text-white relative">
       {#if event.imagen_url}
-        <div class="w-full h-64 md:h-2/5 relative">
+        <div class="absolute inset-0 opacity-40">
           <img src={event.imagen_url} alt={event.titulo} class="w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
         </div>
       {/if}
-      <div class="p-8 flex-1 flex flex-col justify-start">
-        <div class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 self-start" style="background-color: {event.color_evento}; color: white;">
-          Evento Especial
-        </div>
-        <h2 class="text-3xl font-bold mb-4">{event.titulo}</h2>
-        <p class="text-gray-300 text-sm mb-6">{event.descripcion}</p>
-        
-        <div class="space-y-4 font-medium mt-auto bg-white/10 p-5 rounded-2xl backdrop-blur-md">
-          <div class="flex items-center gap-3">
-            <CalendarDays class="w-5 h-5 text-gray-300"/>
-            {new Date(event.fecha).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long'})}
+      <div class="relative p-8 h-full flex flex-col z-10 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent">
+        <div class="mt-auto">
+          <div class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4" style="background-color: {event.color_evento}; color: white;">
+            Evento Especial
           </div>
-          <div class="flex items-center gap-3">
-            <Clock class="w-5 h-5 text-gray-300"/>
-            {event.hora.substring(0,5)}
-          </div>
-          <div class="flex items-center gap-3">
-            <Users class="w-5 h-5 text-gray-300"/>
-            {remaining} plazas libres
+          <h2 class="text-3xl font-bold mb-4">{event.titulo}</h2>
+          <p class="text-gray-300 text-sm mb-6 line-clamp-3">{event.descripcion}</p>
+          
+          <div class="space-y-3 font-medium">
+            <div class="flex items-center gap-3">
+              <CalendarDays class="w-5 h-5 text-gray-400"/>
+              {new Date(event.fecha).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long'})}
+            </div>
+            <div class="flex items-center gap-3">
+              <Clock class="w-5 h-5 text-gray-400"/>
+              {event.hora.substring(0,5)}
+            </div>
+            <div class="flex items-center gap-3">
+              <Users class="w-5 h-5 text-gray-400"/>
+              {remaining} plazas libres
+            </div>
+            <div class="flex items-center gap-3">
+              <CreditCard class="w-5 h-5 text-gray-400"/>
+              {event.precio_persona}€ / persona
+            </div>
           </div>
         </div>
       </div>
