@@ -29,28 +29,8 @@ const menuItems = [
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title} | Admin Panel</title>
-		<script>
-			import { supabase } from '../lib/supabase';
-			
-			// Auth Guard: Verificar sesión antes de mostrar el contenido
-			supabase.auth.getSession().then(({ data: { session } }) => {
-				const isDemo = localStorage.getItem('demo_mode') === 'true';
-				if (!session && !isDemo) {
-					window.location.href = '/admin/login';
-				} else {
-					document.body.classList.remove('opacity-0');
-				}
-			});
-			
-			// Lógica global para cerrar sesión
-			(window as any).handleLogout = async () => {
-				localStorage.removeItem('demo_mode');
-				await supabase.auth.signOut();
-				window.location.href = '/admin/login';
-			};
-		</script>
 	</head>
-	<body class="h-screen bg-[#f8f9fc] flex overflow-hidden opacity-0 transition-opacity duration-300">
+	<body class="h-screen bg-[#f8f9fc] flex overflow-hidden">
 
 		<!-- Toast Container (global) -->
 		<div class="toast-container" id="toast-container"></div>
@@ -97,15 +77,10 @@ const menuItems = [
                     <div class="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center font-bold text-xs shrink-0">
                         AD
                     </div>
-                    <div class="min-w-0 flex-1">
+                    <div class="min-w-0">
                         <p class="text-sm font-semibold text-gray-800 truncate">Administrador</p>
                         <p class="text-xs text-gray-400">Panel de control</p>
                     </div>
-                    <button onclick="window.handleLogout()" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition" title="Cerrar sesión">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                    </button>
                 </div>
                 <!-- Selector de Restaurante -->
                 <RestaurantSwitcher client:only="svelte" />
