@@ -1,0 +1,13 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import EventBookingWidget from '../../components/EventBookingWidget.svelte';
+
+// Obtener el ID del evento de la URL
+const { id } = Astro.params;
+---
+
+<Layout title="Comprar Entradas - Evento">
+	<div class="max-w-6xl mx-auto mt-4 px-4 pb-12">
+		<EventBookingWidget client:load eventId={id as string} />
+	</div>
+</Layout>

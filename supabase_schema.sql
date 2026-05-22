@@ -133,7 +133,48 @@ CREATE TABLE public.shift_overrides (
 ALTER TABLE public.shift_overrides DISABLE ROW LEVEL SECURITY;
 
 -- ==========================================
--- 10. RPC: Check Overlapping Availability
+-- 9. Events (Eventos Especiales)
+-- ==========================================
+CREATE TYPE event_status AS ENUM ('borrador', 'activo', 'finalizado');
+
+CREATE TABLE public.events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    restaurant_id UUID REFERENCES public.restaurants(id) ON DELETE CASCADE,
+    titulo TEXT NOT NULL,
+    descripcion TEXT,
+    imagen_url TEXT,
+    fecha DATE NOT NULL,
+    hora TIME NOT NULL,
+    precio_persona DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    capacidad_maxima INTEGER NOT NULL CHECK (capacidad_maxima > 0),
+    estado event_status DEFAULT 'borrador',
+    color_evento TEXT DEFAULT '#3B82F6', -- Default blue
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ==========================================
+-- 10. Event Bookings (Reservas de Eventos)
+-- ==========================================
+CREATE TYPE event_payment_status AS ENUM ('pendiente', 'pagado', 'reembolsado');
+
+CREATE TABLE public.event_bookings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    event_id UUID REFERENCES public.events(id) ON DELETE CASCADE,
+    nombre_cliente TEXT NOT NULL,
+    email_cliente TEXT NOT NULL,
+    telefono TEXT,
+    comensales INTEGER NOT NULL CHECK (comensales > 0),
+    total_pago DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    estado_pago event_payment_status DEFAULT 'pendiente',
+    stripe_payment_id TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.events DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.event_bookings DISABLE ROW LEVEL SECURITY;
+
+-- ==========================================
+-- 11. RPC: Check Overlapping Availability
 -- ==========================================
 CREATE OR REPLACE FUNCTION check_availability(
     p_restaurant_id UUID, 

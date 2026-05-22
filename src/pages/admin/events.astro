@@ -1,0 +1,11 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import EventManager from '../../components/EventManager.svelte';
+
+// ID fijo de restaurante (MVP)
+const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
+---
+
+<AdminLayout title="Gestión de Eventos">
+	<EventManager client:load restaurantId={RESTAURANT_ID} />
+</AdminLayout>
