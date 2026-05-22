@@ -7,8 +7,10 @@
 
   let bookings: any[] = [];
   let loading = true;
+  
   const today = new Date();
   let selectedDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+  
   let selectedBooking: any = null;
   let subscription: any;
 
@@ -149,7 +151,7 @@
     }
   }
 
-  $: if (restaurantId !== 'rest-id-placeholder' && selectedDate) {
+  $: if (selectedDate && restaurantId && restaurantId !== 'rest-id-placeholder') {
     fetchBookings();
   }
 </script>
