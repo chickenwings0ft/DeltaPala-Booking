@@ -12,6 +12,8 @@
   let loading = true;
   let saving = false;
   let saveSuccess = false;
+  let testEmail = '';
+  let sendingTest = false;
 
   const TEMPLATES = [
     { id: 'confirmacion', name: 'Confirmación de Reserva' },
