@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { supabase } from '../lib/supabase';
   import { CalendarDays, ChevronLeft, ChevronRight, Settings, Loader2, Save, X } from 'lucide-svelte';
 
@@ -150,10 +150,31 @@
     }
   }
 
+  let subscription: any;
+
   onMount(() => {
     const savedId = localStorage.getItem('admin_restaurant_id');
     if (savedId) restaurantId = savedId;
     loadData();
+
+    subscription = supabase
+      .channel('calendar-bookings')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'bookings',
+        filter: `restaurant_id=eq.${restaurantId}` 
+      }, () => {
+        // Al haber cualquier cambio en bookings, recargar los colores del calendario
+        loadData();
+      })
+      .subscribe();
+  });
+
+  onDestroy(() => {
+    if (subscription) {
+      supabase.removeChannel(subscription);
+    }
   });
 </script>
 

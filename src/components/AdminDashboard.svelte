@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { supabase } from '../lib/supabase';
   import { CalendarDays, Users, Clock, MoreVertical, Search, CheckCircle, XCircle } from 'lucide-svelte';
 
@@ -9,6 +9,7 @@
   let loading = true;
   let selectedDate = new Date().toISOString().split('T')[0];
   let selectedBooking: any = null;
+  let subscription: any;
 
   async function fetchBookings() {
     loading = true;
@@ -26,6 +27,12 @@
 
       if (error) throw error;
       bookings = data || [];
+      
+      // Update selected booking reference if it exists
+      if (selectedBooking) {
+        const updatedSelected = bookings.find(b => b.id === selectedBooking.id);
+        if (updatedSelected) selectedBooking = updatedSelected;
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -42,11 +49,7 @@
 
       if (error) throw error;
       
-      // Update local state
-      bookings = bookings.map(b => b.id === id ? { ...b, estado: status } : b);
-      if (selectedBooking && selectedBooking.id === id) {
-        selectedBooking.estado = status;
-      }
+      // Local state is updated via Realtime anyway, but we can keep optimistic UI
     } catch (e) {
       console.error('Error actualizando estado:', e);
     }
@@ -56,6 +59,32 @@
     const savedId = localStorage.getItem('admin_restaurant_id');
     if (savedId) restaurantId = savedId;
     fetchBookings();
+
+    // Suscripción en tiempo real a cambios en reservas
+    subscription = supabase
+      .channel('dashboard-bookings')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'bookings',
+        filter: `restaurant_id=eq.${restaurantId}` 
+      }, (payload) => {
+        // Solo refrescar si el cambio afecta al día seleccionado
+        const affectsCurrentDate = 
+          (payload.new && payload.new.fecha === selectedDate) || 
+          (payload.old && payload.old.fecha === selectedDate);
+          
+        if (affectsCurrentDate) {
+          fetchBookings();
+        }
+      })
+      .subscribe();
+  });
+
+  onDestroy(() => {
+    if (subscription) {
+      supabase.removeChannel(subscription);
+    }
   });
 
   // Modal de Nueva Reserva Manual
