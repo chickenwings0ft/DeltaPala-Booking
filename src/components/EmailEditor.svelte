@@ -29,7 +29,28 @@
 
   let selectedTemplateId = 'confirmacion';
   let plantillas: Record<string, string> = {
-    confirmacion: 'Hola {{client_name}}, tu reserva para el {{date}} a las {{time}} está confirmada.',
+    confirmacion: `
+<h2>¡Tu reserva está confirmada, <strong>{{client_name}}</strong>! 🎉</h2>
+<p>Nos alegra comunicarte que tu mesa en <strong>{{restaurant_name}}</strong> ha sido reservada con éxito.</p>
+<br>
+<h3>📋 Detalles de la Reserva:</h3>
+<ul>
+  <li><strong>Fecha:</strong> {{date}}</li>
+  <li><strong>Hora:</strong> {{time}}</li>
+  <li><strong>Comensales:</strong> {{pax}} personas</li>
+  <li><strong>Lugar:</strong> {{restaurant_name}}</li>
+</ul>
+<br>
+<p>Guarda la fecha en tu calendario para no olvidarlo:</p>
+<p>
+  <a href="#" style="background-color: #4285F4; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; margin-right: 8px; font-weight: bold;">📅 Google Calendar</a>
+  <a href="#" style="background-color: #000000; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; margin-right: 8px; font-weight: bold;">🍎 Apple Calendar</a>
+  <a href="#" style="background-color: #000000; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; display: inline-block; font-weight: bold;">💳 Apple Wallet (Próximamente)</a>
+</p>
+<br>
+<p>Si necesitas modificar o cancelar tu reserva, por favor contáctanos lo antes posible.</p>
+<p><em>¡Te esperamos pronto!</em></p>
+    `,
     cancelacion: 'Hola {{client_name}}, tu reserva ha sido cancelada.',
     recordatorio: 'Hola {{client_name}}, recuerda tu reserva mañana a las {{time}}.'
   };
