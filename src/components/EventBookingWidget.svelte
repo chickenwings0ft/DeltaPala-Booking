@@ -108,33 +108,32 @@
 {:else}
   <div class="bg-white shadow-2xl rounded-2xl overflow-hidden max-w-4xl mx-auto flex flex-col md:flex-row">
     <!-- Image & Details Side -->
-    <div class="w-full md:w-5/12 bg-gray-900 text-white relative">
+    <div class="w-full md:w-5/12 bg-gray-900 text-white flex flex-col">
       {#if event.imagen_url}
-        <div class="absolute inset-0 opacity-40">
+        <div class="w-full h-64 md:h-2/5 relative">
           <img src={event.imagen_url} alt={event.titulo} class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
         </div>
       {/if}
-      <div class="relative p-8 h-full flex flex-col z-10 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent">
-        <div class="mt-auto">
-          <div class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4" style="background-color: {event.color_evento}; color: white;">
-            Evento Especial
+      <div class="p-8 flex-1 flex flex-col justify-start">
+        <div class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 self-start" style="background-color: {event.color_evento}; color: white;">
+          Evento Especial
+        </div>
+        <h2 class="text-3xl font-bold mb-4">{event.titulo}</h2>
+        <p class="text-gray-300 text-sm mb-6">{event.descripcion}</p>
+        
+        <div class="space-y-4 font-medium mt-auto bg-white/10 p-5 rounded-2xl backdrop-blur-md">
+          <div class="flex items-center gap-3">
+            <CalendarDays class="w-5 h-5 text-gray-300"/>
+            {new Date(event.fecha).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long'})}
           </div>
-          <h2 class="text-3xl font-bold mb-4">{event.titulo}</h2>
-          <p class="text-gray-300 text-sm mb-6 line-clamp-3">{event.descripcion}</p>
-          
-          <div class="space-y-3 font-medium">
-            <div class="flex items-center gap-3">
-              <CalendarDays class="w-5 h-5 text-gray-400"/>
-              {new Date(event.fecha).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long'})}
-            </div>
-            <div class="flex items-center gap-3">
-              <Clock class="w-5 h-5 text-gray-400"/>
-              {event.hora.substring(0,5)}
-            </div>
-            <div class="flex items-center gap-3">
-              <CreditCard class="w-5 h-5 text-gray-400"/>
-              {event.precio_persona}€ / persona
-            </div>
+          <div class="flex items-center gap-3">
+            <Clock class="w-5 h-5 text-gray-300"/>
+            {event.hora.substring(0,5)}
+          </div>
+          <div class="flex items-center gap-3">
+            <Users class="w-5 h-5 text-gray-300"/>
+            {remaining} plazas libres
           </div>
         </div>
       </div>
@@ -202,12 +201,44 @@
           </div>
         {/if}
       {:else}
-        <div class="text-center py-12 px-6 flex flex-col items-center">
+        <div class="text-center py-8 px-6 flex flex-col items-center">
           <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
             <CheckCircle class="w-10 h-10 text-green-600" />
           </div>
-          <h2 class="text-3xl font-black text-gray-900 mb-4">¡Entradas confirmadas!</h2>
-          <p class="text-gray-600 mb-8 max-w-md">Hemos enviado un email a <strong>{email}</strong> con los detalles de tu reserva para el evento <strong>{event.titulo}</strong>.</p>
+          <h2 class="text-3xl font-black text-gray-900 mb-2">¡Entradas confirmadas!</h2>
+          <p class="text-gray-600 mb-6 max-w-md">Hemos enviado un email a <strong>{email}</strong> con los detalles de tu reserva.</p>
+          
+          <div class="w-full space-y-3 mb-8">
+            <!-- Google Calendar -->
+            <a 
+              href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={encodeURIComponent(event.titulo)}&dates={event.fecha.replace(/-/g, '')}T{event.hora.replace(/:/g, '')}00/{event.fecha.replace(/-/g, '')}T235900&details={encodeURIComponent('Entradas confirmadas para ' + pax + ' personas. ' + (event.descripcion || ''))}&location=Restaurante" 
+              target="_blank" 
+              class="w-full bg-white border border-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2 shadow-sm"
+            >
+              <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.28c0-.79-.07-1.54-.19-2.28H12v4.3h6.44c-.28 1.4-1.04 2.58-2.18 3.34v2.77h3.52c2.06-1.9 3.25-4.69 3.25-8.13z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.52-2.77c-1.08.72-2.46 1.15-4.41 1.15-3.4 0-6.28-2.29-7.31-5.37H1.05v2.85C3.04 20.91 7.18 24 12 24z"/><path fill="#FBBC05" d="M4.69 14.1c-.26-.78-.41-1.61-.41-2.46s.15-1.68.41-2.46V6.33H1.05C.38 7.77 0 9.35 0 11.02s.38 3.25 1.05 4.69l3.64-2.85z"/><path fill="#EA4335" d="M12 4.93c1.76 0 3.34.61 4.59 1.79l3.43-3.43C17.95 1.25 15.24 0 12 0 7.18 0 3.04 3.09 1.05 7.04l3.64 2.85C5.72 7.22 8.6 4.93 12 4.93z"/></svg>
+              Añadir a Google Calendar
+            </a>
+
+            <!-- Apple Calendar (ICS) -->
+            <a 
+              href="data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ASUMMARY:{encodeURIComponent(event.titulo)}%0ADESCRIPTION:Entradas para {pax} personas.%0ADTSTART;VALUE=DATE:{event.fecha.replace(/-/g, '')}%0AEND:VEVENT%0AEND:VCALENDAR"
+              download="{event.titulo.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics"
+              class="w-full bg-white border border-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2 shadow-sm"
+            >
+              <CalendarDays class="w-5 h-5 text-red-500" />
+              Añadir a Apple / Outlook
+            </a>
+
+            <!-- Apple Wallet (MVP Alert) -->
+            <button 
+              on:click={() => alert('¡El pase de Apple Wallet se descargará en producción cuando se conecten los certificados de Apple Developer! (MVP)')}
+              class="w-full bg-black text-white font-bold py-3 rounded-xl hover:bg-gray-800 transition flex items-center justify-center gap-2 shadow-sm"
+            >
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-1-13h2v4h-2V7zm0 6h2v2h-2v-2z"/></svg>
+              Añadir a Apple Wallet
+            </button>
+          </div>
+
           <div class="bg-gray-50 p-6 rounded-2xl w-full border border-gray-200 text-left">
             <h4 class="font-bold text-sm uppercase text-gray-400 mb-4">Resumen</h4>
             <div class="space-y-3">

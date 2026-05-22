@@ -321,9 +321,9 @@
           <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">Imagen del Evento</label>
             {#if editingEvent.imagen_url}
-              <div class="relative h-20 bg-gray-100 rounded-xl overflow-hidden mb-2 border border-gray-200">
+              <div class="relative h-40 bg-gray-100 rounded-xl overflow-hidden mb-2 border border-gray-200">
                 <img src={editingEvent.imagen_url} alt="Preview" class="w-full h-full object-cover" />
-                <button on:click={() => {editingEvent.imagen_url = ''; selectedImageFile = null;}} class="absolute top-1 right-1 bg-white/90 p-1 rounded-md text-red-500 hover:bg-white shadow-sm transition"><Trash2 class="w-4 h-4"/></button>
+                <button on:click={() => {editingEvent.imagen_url = ''; selectedImageFile = null;}} class="absolute top-2 right-2 bg-white/90 p-2 rounded-lg text-red-500 hover:bg-white shadow-md transition"><Trash2 class="w-4 h-4"/></button>
               </div>
             {/if}
             {#if !editingEvent.imagen_url}
