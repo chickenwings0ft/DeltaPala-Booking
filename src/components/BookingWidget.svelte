@@ -31,6 +31,24 @@
   let alergenos = '';
   let isSubmitting = false;
   let errorMsg = '';
+  
+  let currentWaitlistId: string | null = null;
+  let isCancellingWaitlist = false;
+
+  async function cancelWaitlist() {
+    if (!currentWaitlistId) return;
+    isCancellingWaitlist = true;
+    try {
+      await supabase.from('waitlist').delete().eq('id', currentWaitlistId);
+      step = 1;
+      nombre = ''; email = ''; telefono = ''; alergenos = ''; selectedDate = ''; selectedTime = '';
+      currentWaitlistId = null;
+    } catch (e) {
+      console.error('Error canceling waitlist', e);
+    } finally {
+      isCancellingWaitlist = false;
+    }
+  }
 
   // Calendar State
   let calDate = new Date();
@@ -220,7 +238,7 @@
 
       if (isWaitlist) {
         // 2a. Crear Lista de Espera
-        const { error: waitlistError } = await supabase
+        const { data: waitlistData, error: waitlistError } = await supabase
           .from('waitlist')
           .insert([{
             restaurant_id: restaurantId,
@@ -228,8 +246,11 @@
             fecha: selectedDate,
             comensales: pax,
             flexibilidad_horaria: { nota: alergenos }
-          }]);
+          }])
+          .select()
+          .single();
         if (waitlistError) throw waitlistError;
+        if (waitlistData) currentWaitlistId = waitlistData.id;
         step = 5; // Mostrar success waitlist
       } else {
         // 2b. Crear Reserva
@@ -469,18 +490,31 @@
 
     <!-- Paso 5: Fallback / Lista de Espera -->
     {#if step === 5}
-      <div in:fade class="text-center py-6">
-        <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Clock class="w-10 h-10 text-yellow-600" />
+      <div in:fade class="py-6">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Clock class="w-8 h-8 text-yellow-600" />
+          </div>
+          <h2 class="text-2xl font-extrabold text-gray-900 mb-2">Te has apuntado a la lista de espera</h2>
         </div>
-        <h2 class="text-2xl font-extrabold text-gray-900 mb-2">Lista de Espera</h2>
-        <p class="text-gray-500 mb-6 text-sm">
-          {errorMsg || 'No pudimos confirmar tu reserva automáticamente, pero te hemos añadido a la lista de espera prioritariamente.'}
+
+        <p class="text-gray-900 mb-2 text-sm font-bold">¿Cómo funciona?</p>
+        <p class="text-gray-600 mb-6 text-sm leading-relaxed">
+          Si otra mesa cancela o no confirma su asistencia en las próximas horas (algo que ocurre habitualmente), el sistema nos avisará. En ese mismo instante te llamaremos directamente por teléfono o te enviaremos un WhatsApp para ofrecerte el hueco.
         </p>
-        
-        <button on:click={() => step = 1} class="w-full h-12 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition">
-          Volver a intentarlo
-        </button>
+
+        <div class="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Si tus planes cambian y prefieres cancelar tu solicitud, por favor haz clic aquí:
+          </p>
+          <button on:click={cancelWaitlist} disabled={isCancellingWaitlist} class="mt-4 w-full h-11 bg-red-600 text-white rounded-lg font-bold text-sm hover:bg-red-700 transition disabled:opacity-50 flex items-center justify-center gap-2">
+            {#if isCancellingWaitlist}
+              <Loader2 class="w-4 h-4 animate-spin" /> Cancelando...
+            {:else}
+              Cancelar solicitud
+            {/if}
+          </button>
+        </div>
       </div>
     {/if}
   </div>
