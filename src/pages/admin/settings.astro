@@ -1,29 +1,25 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import OpeningHoursConfig from '../../components/OpeningHoursConfig.svelte';
 import FormConfigEditor from '../../components/FormConfigEditor.svelte';
+import SpecialDaysConfig from '../../components/SpecialDaysConfig.svelte';
 
-// ID de restaurante fijo para el MVP
+// Usaremos un ID de restaurante por defecto para el MVP
 const RESTAURANT_ID = '00000000-0000-0000-0000-000000000000';
 ---
 
 <AdminLayout title="Configuración" currentPath="/admin/settings">
-	<div class="max-w-4xl mx-auto">
+	<div class="max-w-5xl mx-auto">
 		<div class="mb-6">
-			<h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Configuración del Restaurante</h1>
-			<p class="text-gray-500 mt-1">Gestiona los horarios, campos del formulario y personalización visual.</p>
+			<h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Configuración General</h1>
+			<p class="text-gray-500 mt-1">Personaliza el comportamiento del widget de reservas.</p>
 		</div>
 
 		<div class="space-y-8">
-            <!-- Componente modular de Horarios -->
-            <section>
-                <OpeningHoursConfig client:only="svelte" restaurantId={RESTAURANT_ID} />
-            </section>
+			<!-- Días Especiales (Cierres por vacaciones, etc.) -->
+			<SpecialDaysConfig client:only="svelte" restaurantId={RESTAURANT_ID} />
 
-            <!-- Componente modular del Formulario -->
-            <section>
-                <FormConfigEditor client:only="svelte" restaurantId={RESTAURANT_ID} />
-            </section>
-        </div>
+			<!-- Configuración del Formulario -->
+			<FormConfigEditor client:only="svelte" restaurantId={RESTAURANT_ID} />
+		</div>
 	</div>
 </AdminLayout>
