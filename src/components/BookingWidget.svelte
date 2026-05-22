@@ -19,9 +19,10 @@
   let selectedTime: string = '';
   
   // Time Slots
-  let timeSlots: { hora: string; disponible: boolean }[] = [];
+  let timeSlots: { hora: string; disponible: boolean; shiftName: string; duration: number }[] = [];
   let checkingAvailability = false;
   let isWaitlist = false;
+  let selectedShiftDuration = 90;
 
   // Contact Info
   let nombre = '';
@@ -132,66 +133,49 @@
     timeSlots = [];
 
     try {
-      // 1. Obtener la configuración de horarios del restaurante
-      const { data: settings } = await supabase
-        .from('business_settings')
-        .select('horarios_apertura')
+      // 1. Obtener los turnos (shifts) del restaurante
+      const { data: shiftData, error: shiftError } = await supabase
+        .from('shifts')
+        .select('*')
         .eq('restaurant_id', restaurantId)
-        .single();
+        .order('start_time');
+      
+      if (shiftError) throw shiftError;
 
-      let generatedSlots: string[] = [];
-
-      if (settings && settings.horarios_apertura) {
-        // En Javascript, 0 = Domingo, 1 = Lunes...
-        // Para evitar problemas de zona horaria con UTC, parseamos manualmente a hora local
-        const [y, m, d] = selectedDate.split('-');
-        const dateObj = new Date(Number(y), Number(m) - 1, Number(d));
-        const dayOfWeek = dateObj.getDay().toString();
-        const configDia = settings.horarios_apertura[dayOfWeek];
-
-        if (configDia && configDia.isOpen && configDia.ranges) {
-          configDia.ranges.forEach((r: any) => {
-            generatedSlots.push(...generateTimeSlots(r.open, r.close));
-          });
-        }
-      }
-
-      // Si no hay horarios para ese día (cerrado) o no hay configuración
-      if (generatedSlots.length === 0) {
+      if (!shiftData || shiftData.length === 0) {
         timeSlots = [];
+        checkingAvailability = false;
         return;
       }
 
-      // 2. Comprobar aforo en Supabase pasando los slots generados
-      // Usaremos una consulta directa ya que actualizaremos la RPC después, 
-      // pero por ahora haremos la lógica en Svelte para el MVP
-      const { data: rooms } = await supabase
-        .from('rooms')
-        .select('capacidad_maxima')
-        .eq('restaurant_id', restaurantId);
+      // 2. Generar slots por turno y verificar disponibilidad en paralelo
+      const promises: Promise<{ hora: string, disponible: boolean, shiftName: string, duration: number }>[] = [];
+
+      for (const shift of shiftData) {
+        const slots = generateTimeSlots(shift.start_time.slice(0,5), shift.end_time.slice(0,5));
         
-      const maxCap = rooms?.reduce((acc, curr) => acc + (curr.capacidad_maxima || 0), 0) || 50;
-
-      const { data: bookings } = await supabase
-        .from('bookings')
-        .select('hora, comensales')
-        .eq('restaurant_id', restaurantId)
-        .eq('fecha', selectedDate)
-        .neq('estado', 'cancelada');
-
-      // Agrupar reservas por hora
-      const bookedPaxPerSlot: Record<string, number> = {};
-      if (bookings) {
-        bookings.forEach(b => {
-          bookedPaxPerSlot[b.hora] = (bookedPaxPerSlot[b.hora] || 0) + b.comensales;
-        });
+        for (const hora of slots) {
+           promises.push(
+             supabase.rpc('check_availability', {
+               p_restaurant_id: restaurantId,
+               p_fecha: selectedDate,
+               p_hora: hora + ':00',
+               p_pax: pax,
+               p_duration_minutes: shift.duration_minutes
+             }).then(({ data, error }) => {
+               if (error) console.error(error);
+               return { 
+                 hora, 
+                 disponible: data === true, 
+                 shiftName: shift.name,
+                 duration: shift.duration_minutes 
+               };
+             })
+           );
+        }
       }
-
-      // Calcular disponibilidad
-      timeSlots = generatedSlots.map(hora => ({
-        hora,
-        disponible: (maxCap - (bookedPaxPerSlot[hora] || 0)) >= pax
-      }));
+      
+      timeSlots = await Promise.all(promises);
 
     } catch (err) {
       console.error('Error fetching availability:', err);
@@ -250,6 +234,7 @@
             client_id: clientId,
             fecha: selectedDate,
             hora: selectedTime,
+            end_time: calculateEndTime(selectedTime, selectedShiftDuration),
             comensales: pax,
             estado: 'pendiente'
           }]);
@@ -364,15 +349,22 @@
             <button on:click={() => { isWaitlist = true; step = 3; }} class="mt-4 w-full bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-gray-800 transition">Apúntate a la lista de espera</button>
           </div>
         {:else}
-          <div class="grid grid-cols-3 gap-3 mb-6">
-            {#each timeSlots as slot}
-              <button 
-                on:click={() => { selectedTime = slot.hora; step = 3; }}
-                disabled={!slot.disponible}
-                class="h-12 rounded-xl font-bold text-sm transition-all border-2 {slot.disponible ? 'border-brand/20 bg-white text-gray-800 hover:border-brand hover:text-brand shadow-sm' : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'}"
-              >
-                {slot.hora}
-              </button>
+          <div class="space-y-6 mb-6">
+            {#each Array.from(new Set(timeSlots.map(s => s.shiftName))) as shiftName}
+              <div>
+                <h4 class="text-sm font-bold text-gray-700 mb-3 border-b border-gray-100 pb-2">{shiftName}</h4>
+                <div class="grid grid-cols-3 gap-3">
+                  {#each timeSlots.filter(s => s.shiftName === shiftName) as slot}
+                    <button 
+                      on:click={() => { selectedTime = slot.hora; selectedShiftDuration = slot.duration; step = 3; }}
+                      disabled={!slot.disponible}
+                      class="h-12 rounded-xl font-bold text-sm transition-all border-2 {slot.disponible ? 'border-brand/20 bg-white text-gray-800 hover:border-brand hover:text-brand shadow-sm' : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'}"
+                    >
+                      {slot.hora}
+                    </button>
+                  {/each}
+                </div>
+              </div>
             {/each}
           </div>
           

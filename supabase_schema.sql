@@ -108,36 +108,83 @@ ALTER TABLE public.pricing_rules ENABLE ROW LEVEL SECURITY;
 -- para permitir lecturas a clientes (anon o authenticated) y escrituras a admin.
 
 -- ==========================================
--- 6. RPC Functions
+-- 9. Shifts & Overrides (Dynamic Capacity)
 -- ==========================================
-CREATE OR REPLACE FUNCTION check_availability(p_restaurant_id UUID, p_fecha DATE, p_pax INTEGER)
-RETURNS TABLE (hora TEXT, disponible BOOLEAN) AS $$
-DECLARE
-    v_total_capacity INTEGER;
-BEGIN
-    -- Get total maximum capacity from all rooms
-    SELECT COALESCE(SUM(capacidad_maxima), 50) INTO v_total_capacity 
-    FROM public.rooms 
-    WHERE restaurant_id = p_restaurant_id;
+CREATE TABLE public.shifts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    restaurant_id UUID REFERENCES public.restaurants(id) ON DELETE CASCADE,
+    name TEXT NOT NULL, -- e.g., 'Comida', 'Cena'
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    default_capacity INTEGER NOT NULL DEFAULT 50,
+    duration_minutes INTEGER NOT NULL DEFAULT 90,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+ALTER TABLE public.shifts DISABLE ROW LEVEL SECURITY;
 
-    -- Return availability for dummy time slots (in a real scenario, this iterates over opening hours)
-    -- This is a simplified simulation for the MVP.
-    RETURN QUERY
-    WITH slots AS (
-        SELECT unnest(ARRAY['13:00', '13:30', '14:00', '14:30', '15:00', '20:00', '20:30', '21:00', '21:30', '22:00']) AS hora
-    ),
-    booked AS (
-        SELECT b.hora, COALESCE(SUM(b.comensales), 0) AS total_booked
-        FROM public.bookings b
-        WHERE b.restaurant_id = p_restaurant_id 
-          AND b.fecha = p_fecha 
-          AND b.estado != 'cancelada'
-        GROUP BY b.hora
-    )
-    SELECT 
-        s.hora::TEXT, request OK
-        (v_total_capacity - COALESCE(b.total_booked, 0) >= p_pax) AS disponible
-    FROM slots s
-    LEFT JOIN booked b ON s.hora = b.hora::TEXT;
+CREATE TABLE public.shift_overrides (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shift_id UUID REFERENCES public.shifts(id) ON DELETE CASCADE,
+    date DATE NOT NULL,
+    capacity_override INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(shift_id, date)
+);
+ALTER TABLE public.shift_overrides DISABLE ROW LEVEL SECURITY;
+
+-- ==========================================
+-- 10. RPC: Check Overlapping Availability
+-- ==========================================
+CREATE OR REPLACE FUNCTION check_availability(
+    p_restaurant_id UUID, 
+    p_fecha DATE, 
+    p_hora TIME, 
+    p_pax INTEGER,
+    p_duration_minutes INTEGER
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    v_shift RECORD;
+    v_capacity INTEGER;
+    v_end_time TIME;
+    v_overlapping_pax INTEGER;
+BEGIN
+    -- 1. Encontrar el turno activo para la hora solicitada
+    SELECT * INTO v_shift
+    FROM public.shifts
+    WHERE restaurant_id = p_restaurant_id
+      AND start_time <= p_hora
+      AND end_time > p_hora
+    LIMIT 1;
+
+    -- Si no hay turno configurado, no hay disponibilidad
+    IF NOT FOUND THEN
+        RETURN FALSE;
+    END IF;
+
+    -- 2. Calcular la capacidad real (priorizar override sobre default)
+    SELECT capacity_override INTO v_capacity
+    FROM public.shift_overrides
+    WHERE shift_id = v_shift.id AND date = p_fecha;
+
+    IF v_capacity IS NULL THEN
+        v_capacity := v_shift.default_capacity;
+    END IF;
+
+    -- 3. Calcular solapamiento
+    -- Fin de la nueva reserva
+    v_end_time := p_hora + (p_duration_minutes || ' minutes')::INTERVAL;
+
+    -- Sumar todas las reservas existentes que solapan con [p_hora, v_end_time]
+    SELECT COALESCE(SUM(comensales), 0) INTO v_overlapping_pax
+    FROM public.bookings
+    WHERE restaurant_id = p_restaurant_id
+      AND fecha = p_fecha
+      AND estado != 'cancelada'
+      AND hora < v_end_time
+      AND end_time > p_hora;
+
+    -- 4. Devolver si hay plazas suficientes
+    RETURN (v_capacity - v_overlapping_pax) >= p_pax;
 END;
 $$ LANGUAGE plpgsql;
