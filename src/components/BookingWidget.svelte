@@ -248,7 +248,7 @@
             fecha: selectedDate,
             hora: selectedTime,
             comensales: pax,
-            estado: 'confirmada'
+            estado: 'pendiente'
           }]);
 
         if (bookingError) throw bookingError;

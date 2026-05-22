@@ -135,7 +135,7 @@ BEGIN
         GROUP BY b.hora
     )
     SELECT 
-        s.hora::TEXT, 
+        s.hora::TEXT, request OK
         (v_total_capacity - COALESCE(b.total_booked, 0) >= p_pax) AS disponible
     FROM slots s
     LEFT JOIN booked b ON s.hora = b.hora::TEXT;
