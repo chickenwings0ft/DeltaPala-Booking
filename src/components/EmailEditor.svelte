@@ -298,6 +298,21 @@
     }
   }
 
+  function resetToDefault() {
+    if (confirm('¿Estás seguro? Esto reemplazará tu texto actual con el diseño premium por defecto.')) {
+      const defaults: Record<string, string> = {
+        confirmacion: defaultConfirmacion,
+        cancelacion: defaultCancelacion,
+        recordatorio: defaultRecordatorio,
+        lista_espera: defaultListaEspera
+      };
+      plantillas[selectedTemplateId] = defaults[selectedTemplateId];
+      if (quill) {
+        quill.root.innerHTML = plantillas[selectedTemplateId];
+      }
+    }
+  }
+
   onMount(() => {
     const savedId = localStorage.getItem('admin_restaurant_id');
     if (savedId) restaurantId = savedId;
@@ -336,11 +351,19 @@
       </h2>
       <p class="text-sm text-gray-500 mt-1">Personaliza los correos que reciben tus clientes.</p>
     </div>
-    <button 
-      on:click={saveSettings} 
-      disabled={saving || loading}
-      class="flex items-center gap-2 bg-brand text-white px-4 py-2 rounded-lg font-medium hover:bg-brand-hover transition disabled:opacity-50"
-    >
+    <div class="flex gap-2">
+      <button 
+        on:click={resetToDefault} 
+        disabled={loading}
+        class="text-sm bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition"
+      >
+        Restaurar Diseño Premium
+      </button>
+      <button 
+        on:click={saveSettings} 
+        disabled={saving || loading}
+        class="flex items-center gap-2 bg-brand text-white px-4 py-2 rounded-lg font-medium hover:bg-brand-hover transition disabled:opacity-50"
+      >
       {#if saving}
         <Loader2 class="w-4 h-4 animate-spin" /> Guardando...
       {:else if saveSuccess}
@@ -348,7 +371,8 @@
       {:else}
         <Save class="w-4 h-4" /> Guardar Cambios
       {/if}
-    </button>
+      </button>
+    </div>
   </div>
 
   <div class="p-6">
