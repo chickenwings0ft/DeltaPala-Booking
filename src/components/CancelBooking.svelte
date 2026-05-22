@@ -60,6 +60,25 @@
       if (error) throw error;
       
       status = 'success';
+
+      // Send cancellation email
+      if (bookingDetails && bookingDetails.client) {
+        fetch('/api/send-booking-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'cancelacion',
+            to: bookingDetails.client.email,
+            client_name: bookingDetails.client.nombre,
+            date: new Intl.DateTimeFormat('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(bookingDetails.fecha)),
+            time: bookingDetails.hora,
+            pax: bookingDetails.comensales,
+            restaurant_id: bookingDetails.restaurant?.id,
+            booking_id: bookingId
+          })
+        }).catch(err => console.error('Error enviando email de cancelacion:', err));
+      }
+
     } catch (err: any) {
       console.error(err);
       errorMessage = err.message || 'Error al cancelar la reserva.';

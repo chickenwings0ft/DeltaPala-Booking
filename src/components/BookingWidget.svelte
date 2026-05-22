@@ -252,9 +252,26 @@
         if (waitlistError) throw waitlistError;
         if (waitlistData) currentWaitlistId = waitlistData.id;
         step = 5; // Mostrar success waitlist
+
+        // Enviar email de lista de espera asíncronamente
+        fetch('/api/send-booking-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'lista_espera',
+            to: email,
+            client_name: nombre,
+            date: new Intl.DateTimeFormat('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(selectedDate)),
+            time: selectedTime || 'Por confirmar',
+            pax: pax,
+            restaurant_id: restaurantId,
+            booking_id: currentWaitlistId
+          })
+        }).catch(err => console.error('Error enviando email de espera:', err));
+
       } else {
         // 2b. Crear Reserva
-        const { error: bookingError } = await supabase
+        const { data: bookingData, error: bookingError } = await supabase
           .from('bookings')
           .insert([{
             restaurant_id: restaurantId,
@@ -264,10 +281,28 @@
             end_time: calculateEndTime(selectedTime, selectedShiftDuration),
             comensales: pax,
             estado: 'pendiente'
-          }]);
+          }])
+          .select()
+          .single();
 
         if (bookingError) throw bookingError;
         step = 4; // Éxito
+
+        // Enviar email de confirmación asíncronamente
+        fetch('/api/send-booking-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'confirmacion',
+            to: email,
+            client_name: nombre,
+            date: new Intl.DateTimeFormat('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(selectedDate)),
+            time: selectedTime,
+            pax: pax,
+            restaurant_id: restaurantId,
+            booking_id: bookingData?.id
+          })
+        }).catch(err => console.error('Error enviando email de confirmación:', err));
       }
     } catch (err) {
       console.error(err);
