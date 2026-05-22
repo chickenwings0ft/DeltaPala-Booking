@@ -1,0 +1,91 @@
+---
+import '../styles/global.css';
+import RestaurantSwitcher from '../components/RestaurantSwitcher.svelte';
+
+export interface Props {
+	title: string;
+    currentPath: string;
+}
+
+const { title, currentPath } = Astro.props;
+
+const menuItems = [
+    { name: 'Dashboard', path: '/admin', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
+    { name: 'Calendario', path: '/admin/calendar', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+    { name: 'Plano', path: '/admin/floor-plan', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' },
+    { name: 'Lista de espera', path: '/admin/waitlist', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { name: 'Configuración', path: '/admin/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+    { name: 'Salas', path: '/admin/rooms', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+    { name: 'Emails', path: '/admin/emails', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' }
+];
+---
+
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title} | Admin Panel</title>
+	</head>
+	<body class="min-h-screen bg-gray-50 flex">
+		<!-- Sidebar -->
+		<aside class="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
+			<div class="h-16 flex items-center px-6 border-b border-gray-200 bg-brand text-white">
+				<img src="/assets/logo-pequeno.png" class="w-8 h-8 rounded-full mr-3 bg-white p-1" alt="Logo" />
+				<span class="font-bold text-lg tracking-wide">Admin Panel</span>
+			</div>
+			
+			<div class="flex-1 py-6 px-4 space-y-1">
+				{menuItems.map(item => {
+                    const isActive = currentPath === item.path || (item.path !== '/admin' && currentPath.startsWith(item.path));
+                    return (
+					<a 
+						href={item.path} 
+						class={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive ? 'bg-blue-50 text-brand' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+					>
+						<svg class={`w-5 h-5 ${isActive ? 'text-brand' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={item.icon} />
+						</svg>
+						{item.name}
+					</a>
+				)})}
+			</div>
+            <div class="mt-auto">
+                <div class="p-4 border-t border-gray-200">
+                    <div class="flex items-center gap-3 px-4 py-2">
+                        <div class="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center font-bold text-sm">
+                            AD
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Administrador</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Selector de Restaurante -->
+                <RestaurantSwitcher client:only="svelte" />
+            </div>
+		</aside>
+
+		<!-- Main Content -->
+		<div class="flex-1 flex flex-col min-h-screen overflow-hidden">
+            <!-- Mobile Header -->
+            <header class="md:hidden h-16 bg-brand text-white flex items-center px-4 justify-between shadow-sm">
+                <div class="flex items-center gap-2">
+                    <img src="/assets/logo-pequeno.png" class="w-8 h-8 rounded-full bg-white p-1" alt="Logo" />
+                    <span class="font-bold">Admin Panel</span>
+                </div>
+                <button class="p-2">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </header>
+
+			<main class="flex-1 overflow-y-auto p-4 md:p-8">
+				<slot />
+			</main>
+		</div>
+	</body>
+</html>

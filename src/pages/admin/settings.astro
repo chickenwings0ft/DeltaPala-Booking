@@ -1,0 +1,29 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import OpeningHoursConfig from '../../components/OpeningHoursConfig.svelte';
+import FormConfigEditor from '../../components/FormConfigEditor.svelte';
+
+// ID de restaurante fijo para el MVP
+const RESTAURANT_ID = '00000000-0000-0000-0000-000000000000';
+---
+
+<AdminLayout title="Configuración" currentPath="/admin/settings">
+	<div class="max-w-4xl mx-auto">
+		<div class="mb-6">
+			<h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Configuración del Restaurante</h1>
+			<p class="text-gray-500 mt-1">Gestiona los horarios, campos del formulario y personalización visual.</p>
+		</div>
+
+		<div class="space-y-8">
+            <!-- Componente modular de Horarios -->
+            <section>
+                <OpeningHoursConfig client:only="svelte" restaurantId={RESTAURANT_ID} />
+            </section>
+
+            <!-- Componente modular del Formulario -->
+            <section>
+                <FormConfigEditor client:only="svelte" restaurantId={RESTAURANT_ID} />
+            </section>
+        </div>
+	</div>
+</AdminLayout>

@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #004aad;
+  --color-brand-hover: #003680;
+  --color-bg-light: #ffffff;
+}
+
+body {
+  background-color: var(--color-bg-light);
+  color: #111827;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+}

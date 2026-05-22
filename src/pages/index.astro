@@ -1,0 +1,13 @@
+---
+import Layout from '../layouts/Layout.astro';
+import BookingWidget from '../components/BookingWidget.svelte';
+
+// ID de restaurante fijo para el MVP
+const RESTAURANT_ID = '00000000-0000-0000-0000-000000000000';
+---
+
+<Layout title="Reservas - Tu Restaurante">
+	<div class="max-w-3xl mx-auto mt-4">
+		<BookingWidget client:load restaurantId={RESTAURANT_ID} />
+	</div>
+</Layout>

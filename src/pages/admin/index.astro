@@ -1,0 +1,30 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import AdminDashboard from '../../components/AdminDashboard.svelte';
+
+// ID de restaurante fijo para el MVP
+const RESTAURANT_ID = '00000000-0000-0000-0000-000000000000';
+
+// Simulación de Auth básica
+// En un entorno real se usaría middleware con supabase.auth.getSession()
+---
+
+<AdminLayout title="Dashboard" currentPath="/admin">
+	<div class="max-w-7xl mx-auto px-4">
+		<div class="mb-6 flex justify-between items-end">
+			<div>
+				<h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Dashboard de Recepción</h1>
+				<p class="text-gray-500 mt-1">Gestión de reservas en tiempo real</p>
+			</div>
+			<div class="flex items-center gap-2">
+				<span class="flex h-3 w-3 relative">
+					<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+					<span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+				</span>
+				<span class="text-sm font-medium text-gray-600">Sistema Activo</span>
+			</div>
+		</div>
+
+		<AdminDashboard client:only="svelte" restaurantId={RESTAURANT_ID} />
+	</div>
+</AdminLayout>
