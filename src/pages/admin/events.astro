@@ -6,6 +6,6 @@ import EventManager from '../../components/EventManager.svelte';
 const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
 ---
 
-<AdminLayout title="Gestión de Eventos">
-	<EventManager client:load restaurantId={RESTAURANT_ID} />
+<AdminLayout title="Gestión de Eventos" currentPath="/admin/events">
+	<EventManager client:only="svelte" restaurantId={RESTAURANT_ID} />
 </AdminLayout>
