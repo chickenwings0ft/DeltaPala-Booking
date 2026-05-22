@@ -141,7 +141,23 @@
 
     <!-- Booking Form Side -->
     <div class="w-full md:w-7/12 p-8">
-      {#if step === 1}
+      {#if event.estado === 'borrador'}
+        <div class="h-full flex flex-col items-center justify-center text-center py-12">
+          <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <Clock class="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Evento próximamente</h3>
+          <p class="text-gray-500 max-w-sm">Este evento aún no está disponible para la venta. Vuelve más tarde.</p>
+        </div>
+      {:else if event.estado === 'finalizado'}
+        <div class="h-full flex flex-col items-center justify-center text-center py-12">
+          <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <CalendarDays class="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Evento Finalizado</h3>
+          <p class="text-gray-500 max-w-sm">Este evento ya se ha celebrado. ¡Gracias a todos los asistentes!</p>
+        </div>
+      {:else if step === 1}
         <h3 class="text-xl font-bold text-gray-900 mb-6">Reserva tu entrada</h3>
         
         {#if soldOut}
