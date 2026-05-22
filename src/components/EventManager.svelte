@@ -15,6 +15,8 @@
   let selectedEventForStats: any = null;
   let eventStats: any = null;
   let statsLoading = false;
+  let selectedImageFile: File | null = null;
+  let uploadingImage = false;
 
   const defaultEvent = {
     titulo: '',
@@ -59,12 +61,41 @@
 
   function openCreateModal() {
     editingEvent = { ...defaultEvent, restaurant_id: restaurantId };
+    selectedImageFile = null;
     showModal = true;
   }
 
   function openEditModal(ev: any) {
     editingEvent = { ...ev };
+    selectedImageFile = null;
     showModal = true;
+  }
+
+  async function handleImageUpload(e: any) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Preview immediate
+    selectedImageFile = file;
+    editingEvent.imagen_url = URL.createObjectURL(file); // Temporary preview
+  }
+
+  async function uploadImageToSupabase(file: File): Promise<string> {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    const filePath = `events/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('event-images')
+      .upload(filePath, file);
+
+    if (error) throw error;
+
+    const { data: publicUrlData } = supabase.storage
+      .from('event-images')
+      .getPublicUrl(filePath);
+
+    return publicUrlData.publicUrl;
   }
 
   async function saveEvent() {
@@ -74,6 +105,19 @@
     }
     processing = true;
     try {
+      // Si hay una nueva imagen, subirla primero
+      if (selectedImageFile) {
+        try {
+          const publicUrl = await uploadImageToSupabase(selectedImageFile);
+          editingEvent.imagen_url = publicUrl;
+        } catch (imgErr) {
+          console.error("Error subiendo imagen:", imgErr);
+          alert("Hubo un problema subiendo la imagen. Asegúrate de haber ejecutado el SQL para crear el bucket.");
+          processing = false;
+          return;
+        }
+      }
+
       const { ocupacion, ingresos, event_bookings, ...saveData } = editingEvent;
       
       if (editingEvent.id) {
@@ -275,8 +319,20 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">URL Imagen (Opcional)</label>
-            <input type="text" bind:value={editingEvent.imagen_url} placeholder="https://ejemplo.com/foto.jpg" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-brand text-sm" />
+            <label class="block text-sm font-bold text-gray-700 mb-2">Imagen del Evento</label>
+            {#if editingEvent.imagen_url}
+              <div class="relative h-20 bg-gray-100 rounded-xl overflow-hidden mb-2 border border-gray-200">
+                <img src={editingEvent.imagen_url} alt="Preview" class="w-full h-full object-cover" />
+                <button on:click={() => {editingEvent.imagen_url = ''; selectedImageFile = null;}} class="absolute top-1 right-1 bg-white/90 p-1 rounded-md text-red-500 hover:bg-white shadow-sm transition"><Trash2 class="w-4 h-4"/></button>
+              </div>
+            {/if}
+            {#if !editingEvent.imagen_url}
+              <div class="w-full relative bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl px-4 py-6 flex flex-col items-center justify-center hover:bg-gray-100 transition cursor-pointer">
+                <input type="file" accept="image/*" on:change={handleImageUpload} class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                <svg class="w-6 h-6 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span class="text-xs font-bold text-gray-500">Haz clic para subir imagen</span>
+              </div>
+            {/if}
           </div>
         </div>
       </div>
