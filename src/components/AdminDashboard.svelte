@@ -248,10 +248,12 @@
 
         <div class="pt-4 border-t border-gray-100">
           <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">CRM Info</h4>
-          {#if selectedBooking.client?.etiquetas_crm}
-            <div class="flex flex-wrap gap-2 mb-3">
+          {#if selectedBooking.client?.etiquetas_crm && selectedBooking.client.etiquetas_crm.length > 0}
+            <div class="flex flex-col gap-2 mb-4">
               {#each selectedBooking.client.etiquetas_crm as tag}
-                <span class="bg-indigo-50 text-indigo-700 text-xs px-2 py-1 rounded-md">{tag}</span>
+                <div class="bg-indigo-50 text-indigo-800 text-sm px-3 py-2 rounded-lg border border-indigo-100 whitespace-pre-wrap leading-relaxed">
+                  {tag}
+                </div>
               {/each}
             </div>
           {/if}

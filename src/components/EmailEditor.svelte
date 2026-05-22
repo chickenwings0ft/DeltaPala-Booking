@@ -19,6 +19,7 @@
     { id: 'confirmacion', name: 'Confirmación de Reserva' },
     { id: 'cancelacion', name: 'Cancelación' },
     { id: 'recordatorio', name: 'Recordatorio (24h antes)' },
+    { id: 'lista_espera', name: 'Aviso Lista de Espera' },
   ];
 
   const VARIABLES = [
@@ -102,10 +103,38 @@
 </div>
   `;
 
+  let defaultListaEspera = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 12px; overflow: hidden; background-color: #ffffff;">
+  <div style="background-color: #004aad; padding: 24px; text-align: center;">
+    <img src="https://delta-pala-booking-seven.vercel.app/assets/logo-pequeno.png" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%; background-color: white; padding: 4px;" />
+  </div>
+  <div style="padding: 32px 24px;">
+    <h2 style="color: #111827; margin-top: 0; font-size: 22px;">Te has apuntado a la lista de espera</h2>
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Hola <strong>{{client_name}}</strong>,</p>
+    <p style="color: #4b5563; font-size: 16px; line-height: 1.5;">Tu solicitud para el día {{date}} a las {{time}} ({{pax}} personas) está registrada en nuestra lista de espera.</p>
+
+    <div style="background-color: #f8f9fc; border-left: 4px solid #004aad; padding: 16px; margin: 24px 0; border-radius: 0 8px 8px 0;">
+      <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #111827;">¿Cómo funciona?</h3>
+      <p style="margin: 0; color: #4b5563; font-size: 15px; line-height: 1.6;">
+        Si otra mesa cancela o no confirma su asistencia en las próximas horas (algo que ocurre habitualmente), el sistema nos avisará. En ese mismo instante te llamaremos directamente por teléfono o te enviaremos un WhatsApp para ofrecerte el hueco.
+      </p>
+    </div>
+
+    <p style="color: #4b5563; font-size: 15px; line-height: 1.5;">Si tus planes cambian y prefieres cancelar tu solicitud, por favor haz clic aquí:</p>
+    
+    <div style="margin-top: 24px; text-align: left;">
+      <a href="#" style="background-color: #dc2626; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; font-weight: bold; font-size: 14px;">Cancelar solicitud</a>
+    </div>
+
+  </div>
+</div>
+  `;
+
   let plantillas: Record<string, string> = {
     confirmacion: defaultConfirmacion,
     cancelacion: defaultCancelacion,
-    recordatorio: defaultRecordatorio
+    recordatorio: defaultRecordatorio,
+    lista_espera: defaultListaEspera
   };
 
   async function loadSettings() {
@@ -133,6 +162,9 @@
       }
       if (!plantillas.recordatorio || plantillas.recordatorio.trim() === '') {
         plantillas.recordatorio = defaultRecordatorio;
+      }
+      if (!plantillas.lista_espera || plantillas.lista_espera.trim() === '') {
+        plantillas.lista_espera = defaultListaEspera;
       }
     } catch (err) {
       console.error('Error cargando plantillas:', err);

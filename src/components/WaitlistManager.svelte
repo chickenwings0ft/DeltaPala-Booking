@@ -121,7 +121,7 @@
                   {item.comensales}
                 </span>
               </td>
-              <td class="p-4 text-gray-500 max-w-[200px] truncate">
+              <td class="p-4 text-gray-500 whitespace-pre-wrap">
                 {item.flexibilidad_horaria?.nota || '-'}
               </td>
               <td class="p-4">
