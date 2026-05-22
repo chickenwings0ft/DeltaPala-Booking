@@ -158,17 +158,17 @@
   $: selectedDate, fetchBookings();
 </script>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-[800px]">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto lg:h-[800px] pb-10">
   <!-- Lista de reservas -->
-  <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col h-full overflow-hidden">
-    <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-      <h2 class="font-bold text-brand text-lg flex items-center gap-2">
+  <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col h-[500px] lg:h-full overflow-hidden">
+    <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-50">
+      <h2 class="font-bold text-brand text-lg flex items-center gap-2 shrink-0">
         <CalendarDays class="w-5 h-5 text-gray-500"/>
         Reservas del día
       </h2>
-      <div class="flex items-center gap-3">
-        <input type="date" bind:value={selectedDate} class="border border-gray-300 rounded-md p-1.5 text-sm focus:ring-2 focus:ring-brand outline-none" />
-        <button on:click={() => showNewBookingModal = true} class="bg-brand text-white px-3 py-1.5 text-sm rounded-lg font-bold hover:bg-brand-hover transition flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <input type="date" bind:value={selectedDate} class="border border-gray-300 rounded-md p-1.5 text-sm focus:ring-2 focus:ring-brand outline-none flex-grow sm:flex-grow-0" />
+        <button on:click={() => showNewBookingModal = true} class="bg-brand text-white px-3 py-1.5 text-sm rounded-lg font-bold hover:bg-brand-hover transition flex items-center justify-center gap-2 flex-grow sm:flex-grow-0">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           Nueva Reserva
         </button>
@@ -216,7 +216,7 @@
   </div>
 
   <!-- Detalle / CRM -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-100 h-full overflow-hidden flex flex-col">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 h-auto lg:h-full overflow-hidden flex flex-col min-h-[400px]">
     {#if selectedBooking}
       <div class="p-6 border-b border-gray-100 bg-gray-50">
         <h3 class="font-bold text-xl text-gray-900 mb-1">{selectedBooking.client?.nombre}</h3>
@@ -263,15 +263,15 @@
 
       <div class="p-4 border-t border-gray-100 bg-gray-50 flex flex-col gap-2">
         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Acciones</h4>
-        <div class="grid grid-cols-2 gap-2">
-          <button on:click={() => updateStatus(selectedBooking.id, 'reconfirmada')} class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 rounded-lg font-medium transition">
-            <CheckCircle class="w-4 h-4"/> Reconfirmar
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button on:click={() => updateStatus(selectedBooking.id, 'reconfirmada')} class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm py-2.5 rounded-lg font-medium transition">
+            <CheckCircle class="w-4 h-4 shrink-0"/> Reconfirmar
           </button>
-          <button on:click={() => updateStatus(selectedBooking.id, 'completada')} class="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm py-2 rounded-lg font-medium transition">
-             Completar
+          <button on:click={() => updateStatus(selectedBooking.id, 'completada')} class="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm py-2.5 rounded-lg font-medium transition">
+            <CheckCircle class="w-4 h-4 shrink-0"/> Completar
           </button>
-          <button on:click={() => updateStatus(selectedBooking.id, 'cancelada')} class="col-span-2 flex items-center justify-center gap-2 bg-white border border-red-200 hover:bg-red-50 text-red-600 text-sm py-2 rounded-lg font-medium transition">
-            <XCircle class="w-4 h-4"/> Cancelar Reserva
+          <button on:click={() => updateStatus(selectedBooking.id, 'cancelada')} class="sm:col-span-2 flex items-center justify-center gap-2 bg-white border border-red-200 hover:bg-red-50 text-red-600 text-sm py-2.5 rounded-lg font-medium transition">
+            <XCircle class="w-4 h-4 shrink-0"/> Cancelar Reserva
           </button>
         </div>
       </div>

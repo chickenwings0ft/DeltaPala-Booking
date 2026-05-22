@@ -185,13 +185,13 @@
   });
 </script>
 
-<div class="max-w-6xl mx-auto space-y-6">
-  <div class="flex justify-between items-end">
+<div class="w-full space-y-6">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
     <div>
       <h1 class="text-3xl font-bold text-gray-900 mb-2">Eventos y Experiencias</h1>
       <p class="text-gray-500">Crea eventos especiales con venta de entradas anticipada.</p>
     </div>
-    <button on:click={openCreateModal} class="bg-brand text-white px-5 py-2.5 rounded-xl font-bold hover:bg-brand-hover transition flex items-center gap-2 shadow-sm">
+    <button on:click={openCreateModal} class="bg-brand text-white px-5 py-2.5 rounded-xl font-bold hover:bg-brand-hover transition flex items-center gap-2 shadow-sm w-full sm:w-auto justify-center">
       <Plus class="w-5 h-5"/> Crear Evento
     </button>
   </div>

@@ -65,10 +65,11 @@
       if (error) throw error;
       
       saveSuccess = true;
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Horarios de apertura guardados correctamente', 'success');
       setTimeout(() => saveSuccess = false, 3000);
     } catch (err) {
       console.error('Error guardando horarios:', err);
-      alert('Hubo un error al guardar los horarios.');
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Hubo un error al guardar los horarios.', 'error');
     } finally {
       saving = false;
     }
@@ -82,7 +83,7 @@
 </script>
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-  <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+  <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-50">
     <div>
       <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
         <Clock class="w-5 h-5 text-brand" />
@@ -93,7 +94,7 @@
     <button 
       on:click={saveSettings} 
       disabled={saving || loading}
-      class="flex items-center gap-2 bg-brand text-white px-4 py-2 rounded-lg font-medium hover:bg-brand-hover transition disabled:opacity-50"
+      class="flex items-center justify-center gap-2 bg-brand text-white px-4 py-2.5 rounded-lg font-medium hover:bg-brand-hover transition disabled:opacity-50 w-full sm:w-auto shrink-0"
     >
       {#if saving}
         <Loader2 class="w-4 h-4 animate-spin" /> Guardando...

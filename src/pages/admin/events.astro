@@ -7,5 +7,7 @@ const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
 ---
 
 <AdminLayout title="Gestión de Eventos" currentPath="/admin/events">
-	<EventManager client:only="svelte" restaurantId={RESTAURANT_ID} />
+	<div class="max-w-6xl mx-auto w-full px-4 md:px-0">
+		<EventManager client:only="svelte" restaurantId={RESTAURANT_ID} />
+	</div>
 </AdminLayout>

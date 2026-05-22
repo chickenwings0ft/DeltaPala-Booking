@@ -64,10 +64,11 @@
       if (error) throw error;
       shifts = [...shifts, data];
       newShiftName = '';
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Turno añadido correctamente', 'success');
       if (!selectedShiftIdForOverride) selectedShiftIdForOverride = data.id;
     } catch (err) {
       console.error('Error añadiendo turno:', err);
-      alert('Error al añadir turno');
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Error al añadir turno', 'error');
     } finally {
       processing = false;
     }
@@ -81,9 +82,10 @@
       if (error) throw error;
       shifts = shifts.filter(s => s.id !== id);
       overrides = overrides.filter(o => o.shift_id !== id);
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Turno eliminado', 'warning');
     } catch (err) {
       console.error('Error eliminando turno:', err);
-      alert('Error al eliminar turno');
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Error al eliminar turno', 'error');
     } finally {
       processing = false;
     }
@@ -101,15 +103,16 @@
 
       if (error) {
         if (error.code === '23505') { // Unique violation
-            alert('Ya existe una excepción para este turno y fecha. Elimínala primero si quieres cambiarla.');
+          if (typeof window !== 'undefined' && window.showToast) window.showToast('Ya existe una excepción para este turno y fecha.', 'warning');
         } else throw error;
       } else {
         overrides = [data, ...overrides];
         newOverrideDate = '';
+        if (typeof window !== 'undefined' && window.showToast) window.showToast('Excepción añadida', 'success');
       }
     } catch (err) {
       console.error('Error añadiendo excepción:', err);
-      alert('Error al añadir excepción');
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Error al añadir excepción', 'error');
     } finally {
       processing = false;
     }
@@ -121,9 +124,10 @@
       const { error } = await supabase.from('shift_overrides').delete().eq('id', id);
       if (error) throw error;
       overrides = overrides.filter(o => o.id !== id);
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Excepción eliminada', 'warning');
     } catch (err) {
       console.error('Error eliminando excepción:', err);
-      alert('Error al eliminar excepción');
+      if (typeof window !== 'undefined' && window.showToast) window.showToast('Error al eliminar excepción', 'error');
     } finally {
       processing = false;
     }
@@ -145,14 +149,14 @@
   </div>
 
   <div class="p-6">
-    <form on:submit|preventDefault={addShift} class="flex flex-col md:flex-row gap-3 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-      <input type="text" bind:value={newShiftName} placeholder="Nombre (Ej. Comida)" required class="border border-gray-300 rounded p-2 text-sm flex-1" />
-      <input type="time" bind:value={newShiftStart} required class="border border-gray-300 rounded p-2 text-sm w-32" />
-      <input type="time" bind:value={newShiftEnd} required class="border border-gray-300 rounded p-2 text-sm w-32" />
-      <input type="number" bind:value={newShiftDuration} placeholder="Duración (min)" required class="border border-gray-300 rounded p-2 text-sm w-32" title="Duración de la reserva en minutos" />
-      <input type="number" bind:value={newShiftCapacity} placeholder="Aforo Base" required class="border border-gray-300 rounded p-2 text-sm w-32" />
-      <button type="submit" disabled={processing || !newShiftName} class="bg-brand text-white px-4 py-2 rounded text-sm font-bold flex items-center justify-center gap-1 hover:bg-brand-hover disabled:opacity-50">
-        <Plus class="w-4 h-4"/> Añadir
+    <form on:submit|preventDefault={addShift} class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-3 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+      <input type="text" bind:value={newShiftName} placeholder="Nombre (Ej. Comida)" required class="border border-gray-300 rounded-lg p-2.5 text-sm flex-grow outline-none focus:ring-2 focus:ring-brand bg-white" />
+      <input type="time" bind:value={newShiftStart} required class="border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-brand bg-white" />
+      <input type="time" bind:value={newShiftEnd} required class="border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-brand bg-white" />
+      <input type="number" bind:value={newShiftDuration} placeholder="Duración (min)" required class="border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-brand bg-white" title="Duración de la reserva en minutos" />
+      <input type="number" bind:value={newShiftCapacity} placeholder="Aforo Base" required class="border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-brand bg-white" />
+      <button type="submit" disabled={processing || !newShiftName} class="bg-brand text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 hover:bg-brand-hover disabled:opacity-50 sm:col-span-2 lg:col-span-1">
+        <Plus class="w-4 h-4 shrink-0"/> Añadir Turno
       </button>
     </form>
 
@@ -172,7 +176,7 @@
                 <span>👥 {shift.default_capacity} pax</span>
               </div>
             </div>
-            <button on:click={() => deleteShift(shift.id)} class="text-gray-400 hover:text-red-500 transition opacity-0 group-hover:opacity-100 p-1">
+            <button on:click={() => deleteShift(shift.id)} class="text-gray-400 hover:text-red-500 transition lg:opacity-0 lg:group-hover:opacity-100 p-2 rounded-lg hover:bg-gray-100">
               <Trash2 class="w-4 h-4"/>
             </button>
           </div>
@@ -191,17 +195,17 @@
   </div>
 
   <div class="p-6">
-    <form on:submit|preventDefault={addOverride} class="flex flex-col md:flex-row gap-3 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-      <input type="date" bind:value={newOverrideDate} required class="border border-gray-300 rounded p-2 text-sm w-40" />
-      <select bind:value={selectedShiftIdForOverride} required class="border border-gray-300 rounded p-2 text-sm flex-1">
+    <form on:submit|preventDefault={addOverride} class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-3 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+      <input type="date" bind:value={newOverrideDate} required class="border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-brand bg-white" />
+      <select bind:value={selectedShiftIdForOverride} required class="border border-gray-300 rounded-lg p-2.5 text-sm flex-grow outline-none focus:ring-2 focus:ring-brand bg-white">
         <option value="" disabled>Selecciona un turno...</option>
         {#each shifts as shift}
           <option value={shift.id}>{shift.name} ({shift.start_time.slice(0,5)})</option>
         {/each}
       </select>
-      <input type="number" bind:value={newOverrideCapacity} placeholder="Nuevo Aforo" required class="border border-gray-300 rounded p-2 text-sm w-32" />
-      <button type="submit" disabled={processing || !newOverrideDate || !selectedShiftIdForOverride} class="bg-orange-500 text-white px-4 py-2 rounded text-sm font-bold flex items-center justify-center gap-1 hover:bg-orange-600 disabled:opacity-50">
-        <Plus class="w-4 h-4"/> Excepción
+      <input type="number" bind:value={newOverrideCapacity} placeholder="Nuevo Aforo" required class="border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-brand bg-white" />
+      <button type="submit" disabled={processing || !newOverrideDate || !selectedShiftIdForOverride} class="bg-orange-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 hover:bg-orange-600 disabled:opacity-50 sm:col-span-2 lg:col-span-1">
+        <Plus class="w-4 h-4 shrink-0"/> Excepción
       </button>
     </form>
 
