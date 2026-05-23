@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { fade, slide } from 'svelte/transition';
   import { supabase } from '../lib/supabase';
+  import CalendarButtons from './CalendarButtons.svelte';
   import { Users, Calendar as CalendarIcon, Clock, ArrowRight, User, Phone, Mail, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Loader2 } from 'lucide-svelte';
 
   export let restaurantId: string = '00000000-0000-0000-0000-000000000000';
@@ -252,26 +253,9 @@
         if (waitlistError) throw waitlistError;
         if (waitlistData) currentWaitlistId = waitlistData.id;
         step = 5; // Mostrar success waitlist
-
-        // Enviar email de lista de espera asíncronamente
-        fetch('/api/send-booking-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'lista_espera',
-            to: email,
-            client_name: nombre,
-            date: new Intl.DateTimeFormat('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(selectedDate)),
-            time: selectedTime || 'Por confirmar',
-            pax: pax,
-            restaurant_id: restaurantId,
-            booking_id: currentWaitlistId
-          })
-        }).catch(err => console.error('Error enviando email de espera:', err));
-
       } else {
         // 2b. Crear Reserva
-        const { data: bookingData, error: bookingError } = await supabase
+        const { error: bookingError } = await supabase
           .from('bookings')
           .insert([{
             restaurant_id: restaurantId,
@@ -281,28 +265,10 @@
             end_time: calculateEndTime(selectedTime, selectedShiftDuration),
             comensales: pax,
             estado: 'pendiente'
-          }])
-          .select()
-          .single();
+          }]);
 
         if (bookingError) throw bookingError;
         step = 4; // Éxito
-
-        // Enviar email de confirmación asíncronamente
-        fetch('/api/send-booking-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'confirmacion',
-            to: email,
-            client_name: nombre,
-            date: new Intl.DateTimeFormat('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(selectedDate)),
-            time: selectedTime,
-            pax: pax,
-            restaurant_id: restaurantId,
-            booking_id: bookingData?.id
-          })
-        }).catch(err => console.error('Error enviando email de confirmación:', err));
       }
     } catch (err) {
       console.error(err);
@@ -496,13 +462,13 @@
         <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <CheckCircle2 class="w-10 h-10 text-green-600" />
         </div>
-        <h2 class="text-2xl font-extrabold text-gray-900 mb-2">¡Reserva Confirmada!</h2>
+        <h2 class="text-2xl font-extrabold text-gray-900 mb-2">¡Solicitud enviada!</h2>
         <p class="text-gray-500 mb-6 text-sm">
-          Te esperamos el <strong>{selectedDate}</strong> a las <strong>{selectedTime}</strong>.<br>
-          Hemos enviado los detalles a tu email.
+          Hemos recibido tu solicitud para el <strong>{selectedDate}</strong> a las <strong>{selectedTime}</strong>.<br>
+          En breve recibirás un email de confirmación.
         </p>
         
-        <div class="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
+        <div class="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100 text-left">
           <div class="flex justify-between items-center text-sm border-b border-gray-200 pb-2 mb-2">
             <span class="text-gray-500">Nombre</span>
             <span class="font-bold text-gray-800">{nombre}</span>
@@ -512,12 +478,19 @@
             <span class="font-bold text-gray-800">{pax} pax</span>
           </div>
           <div class="flex justify-between items-center text-sm">
-            <span class="text-gray-500">Código</span>
-            <span class="font-bold text-brand uppercase">{Math.random().toString(36).substr(2, 6)}</span>
+            <span class="text-gray-500">Fecha y hora</span>
+            <span class="font-bold text-brand">{selectedDate} · {selectedTime}</span>
           </div>
         </div>
 
-        <button on:click={() => { step = 1; nombre = ''; email = ''; telefono = ''; alergenos = ''; selectedDate = ''; selectedTime = ''; }} class="text-brand font-bold text-sm hover:underline">
+        <CalendarButtons
+          title={`Reserva en el restaurante`}
+          date={selectedDate}
+          time={selectedTime}
+          description={`Reserva para ${pax} personas a las ${selectedTime}. Nombre: ${nombre}.`}
+        />
+
+        <button on:click={() => { step = 1; nombre = ''; email = ''; telefono = ''; alergenos = ''; selectedDate = ''; selectedTime = ''; }} class="text-brand font-bold text-sm hover:underline mt-6 block mx-auto">
           Hacer otra reserva
         </button>
       </div>
