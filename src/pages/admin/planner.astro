@@ -1,0 +1,26 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import DailyPlanner from '../../components/DailyPlanner.svelte';
+
+const RESTAURANT_ID = '00000000-0000-0000-0000-000000000000';
+---
+
+<AdminLayout title="Planificador Diario" currentPath="/admin/planner">
+	<div class="h-full flex flex-col gap-4">
+		<div class="flex justify-between items-end shrink-0">
+			<div>
+				<h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Planificador Diario</h1>
+				<p class="text-gray-500 mt-1">Vista de ocupación de mesas a lo largo del día</p>
+			</div>
+		</div>
+
+		<!-- El planificador ocupa el resto del espacio disponible -->
+		<div class="flex-1 min-h-0 rounded-xl overflow-hidden shadow-2xl">
+			<DailyPlanner client:only="svelte" restaurantId={RESTAURANT_ID} />
+		</div>
+	</div>
+</AdminLayout>
+
+<style>
+	/* Que el main del AdminLayout no tenga padding inferior para este apartado */
+</style>
