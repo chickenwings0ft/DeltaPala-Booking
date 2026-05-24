@@ -108,30 +108,5 @@
     <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
   </button>
 
-  <!-- Apple Wallet -->
-  <button
-    on:click={openAppleWalletInfo}
-    class="w-full bg-black text-white font-bold py-3 px-4 rounded-xl hover:bg-gray-900 transition flex items-center gap-3 shadow-sm group"
-  >
-    <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M16.62 3.49c-.51.61-1.36 1.09-2.19 1.02-.1-.83.31-1.72.78-2.27.51-.61 1.4-1.06 2.13-1.1.09.87-.25 1.72-.72 2.35zm.7 1.1c-1.21-.07-2.24.69-2.82.69-.58 0-1.47-.66-2.44-.64-1.25.02-2.42.73-3.06 1.86-1.31 2.27-.34 5.63.93 7.48.62.91 1.36 1.91 2.34 1.88.93-.04 1.29-.61 2.42-.61 1.13 0 1.46.61 2.44.59 1.01-.02 1.65-.91 2.27-1.82.71-1.04 1-2.05 1.02-2.11-.02-.02-1.96-.76-1.98-3.01-.02-1.88 1.53-2.78 1.6-2.83-.87-1.29-2.23-1.43-2.72-1.48z"/>
-    </svg>
-    <span class="flex-1 text-left text-sm">Añadir a Apple Wallet</span>
-    <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">Próx.</span>
-  </button>
 
-  <!-- Android / Google Wallet -->
-  <button
-    on:click={openAndroidWalletInfo}
-    class="w-full bg-white border border-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition flex items-center gap-3 shadow-sm group"
-  >
-    <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0z" fill="#4285F4"/>
-      <path d="M12 4.8C8.03 4.8 4.8 8.03 4.8 12s3.23 7.2 7.2 7.2 7.2-3.23 7.2-7.2S15.97 4.8 12 4.8z" fill="white"/>
-      <path d="M12 7.2c-2.647 0-4.8 2.153-4.8 4.8s2.153 4.8 4.8 4.8 4.8-2.153 4.8-4.8S14.647 7.2 12 7.2z" fill="#4285F4"/>
-      <path d="M12 9.6c-1.324 0-2.4 1.076-2.4 2.4s1.076 2.4 2.4 2.4 2.4-1.076 2.4-2.4S13.324 9.6 12 9.6z" fill="white"/>
-    </svg>
-    <span class="flex-1 text-left text-sm">Añadir a Android Wallet</span>
-    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Próx.</span>
-  </button>
 </div>
