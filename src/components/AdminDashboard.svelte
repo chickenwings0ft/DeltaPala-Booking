@@ -1,7 +1,10 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { supabase } from '../lib/supabase';
-  import { CalendarDays, Users, Clock, MoreVertical, Search, CheckCircle, XCircle } from 'lucide-svelte';
+  import { CalendarDays, Users, Clock, MoreVertical, Search, CheckCircle, XCircle, Loader2 } from 'lucide-svelte';
+  import BookingEditDrawer from './BookingEditDrawer.svelte';
+
+  let drawerBooking: any = null;
 
   export let restaurantId: string = 'rest-id-placeholder';
 
@@ -204,7 +207,13 @@
                 </div>
               </div>
               <div>
+              <button
+                on:click|stopPropagation={() => drawerBooking = booking}
+                class="p-1.5 rounded-lg hover:bg-gray-100 transition"
+                title="Editar reserva"
+              >
                 <MoreVertical class="w-5 h-5 text-gray-400" />
+              </button>
               </div>
             </button>
           {/each}
@@ -344,4 +353,14 @@
       </div>
     </div>
   </div>
+{/if}
+
+<!-- Drawer de edición de reserva -->
+{#if drawerBooking}
+  <BookingEditDrawer
+    booking={drawerBooking}
+    restaurantId={restaurantId}
+    onClose={() => drawerBooking = null}
+    onSaved={() => { fetchBookings(); }}
+  />
 {/if}
