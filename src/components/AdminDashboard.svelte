@@ -184,38 +184,40 @@
       {:else}
         <div class="space-y-2">
           {#each bookings as booking}
-            <button 
-              class="w-full text-left p-4 rounded-lg border flex items-center justify-between transition-colors {selectedBooking?.id === booking.id ? 'border-brand bg-gray-50' : 'border-gray-100 hover:border-gray-300'}"
+            <div
+              role="button"
+              tabindex="0"
+              class="w-full text-left p-4 rounded-lg border flex items-center justify-between transition-colors cursor-pointer {selectedBooking?.id === booking.id ? 'border-brand bg-gray-50' : 'border-gray-100 hover:border-gray-300'}"
               on:click={() => selectedBooking = booking}
+              on:keydown={(e) => e.key === 'Enter' && (selectedBooking = booking)}
             >
-              <div class="flex items-center gap-4">
-                <div class="w-16 text-center font-semibold text-brand border-r border-gray-200 pr-4">
+              <div class="flex items-center gap-4 flex-1 min-w-0">
+                <div class="w-16 text-center font-semibold text-brand border-r border-gray-200 pr-4 shrink-0">
                   {booking.hora.substring(0,5)}
                 </div>
-                <div>
-                  <div class="font-medium text-gray-900">{booking.client?.nombre || 'Sin nombre'}</div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-gray-900 truncate">{booking.client?.nombre || 'Sin nombre'}</div>
                   <div class="flex items-center text-xs text-gray-500 gap-3 mt-1">
                     <span class="flex items-center gap-1"><Users class="w-3 h-3"/> {booking.comensales} pax</span>
                     <span class="px-2 py-0.5 rounded-full text-[10px] uppercase font-bold 
                       {booking.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-700' : 
                        booking.estado === 'reconfirmada' ? 'bg-blue-100 text-blue-700' : 
                        booking.estado === 'completada' ? 'bg-green-100 text-green-700' : 
+                       booking.estado === 'confirmada' ? 'bg-brand/10 text-brand' :
                        'bg-red-100 text-red-700'}">
                       {booking.estado}
                     </span>
                   </div>
                 </div>
               </div>
-              <div>
               <button
                 on:click|stopPropagation={() => drawerBooking = booking}
-                class="p-1.5 rounded-lg hover:bg-gray-100 transition"
+                class="p-1.5 rounded-lg hover:bg-gray-200 transition shrink-0 ml-2"
                 title="Editar reserva"
               >
                 <MoreVertical class="w-5 h-5 text-gray-400" />
               </button>
-              </div>
-            </button>
+            </div>
           {/each}
         </div>
       {/if}
