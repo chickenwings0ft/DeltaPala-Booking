@@ -3,7 +3,7 @@
   import { supabase } from '../lib/supabase';
   import { ChevronLeft, ChevronRight, CalendarDays, Loader2 } from 'lucide-svelte';
 
-  export let restaurantId: string = '00000000-0000-0000-0000-000000000000';
+  export let restaurantId: string = '11111111-1111-1111-1111-111111111111';
 
   let bookings: any[] = [];
   let tables: any[] = [];
@@ -13,11 +13,11 @@
   const today = new Date();
   let selectedDate = localDateStr(today);
 
-  // ── Timeline config ──────────────────────────────────────────────────────
+  // ── Timeline config (Compacted to 30-min intervals) ──────────────────────
   const START_HOUR = 9;
   const END_HOUR = 23;
-  const SLOT_MINUTES = 15;
-  const SLOT_WIDTH = 52; // px per 15-min slot
+  const SLOT_MINUTES = 30; // 30-minute intervals
+  const SLOT_WIDTH = 60; // 60px per 30-min slot (120px per hour, highly compressed and readable)
 
   const slots: string[] = [];
   for (let h = START_HOUR; h < END_HOUR; h++) {
@@ -62,9 +62,10 @@
 
   function getBlockStyle(b: any): string {
     const startMins = timeToMins(b.hora.substring(0, 5));
+    // Default duration to 90 minutes if not specified
     const endMins   = b.end_time ? timeToMins(b.end_time.substring(0, 5)) : startMins + 90;
     const left  = (startMins - START_HOUR * 60) * (SLOT_WIDTH / SLOT_MINUTES);
-    const width = Math.max((endMins - startMins) * (SLOT_WIDTH / SLOT_MINUTES) - 3, 24);
+    const width = Math.max((endMins - startMins) * (SLOT_WIDTH / SLOT_MINUTES) - 3, 20);
     return `left:${left}px; width:${width}px;`;
   }
 
@@ -111,7 +112,8 @@
   async function fetchData() {
     loading = true;
     try {
-      const rid = localStorage.getItem('admin_restaurant_id') || restaurantId;
+      const rid = restaurantId;
+      console.log('Planner fetching data for rid:', rid, 'date:', selectedDate);
       const [bRes, tRes] = await Promise.all([
         supabase
           .from('bookings')
@@ -127,17 +129,29 @@
       ]);
       bookings = bRes.data || [];
       tables   = tRes.data || [];
-    } catch(e) { console.error(e); }
+      console.log('Planner bookings loaded:', bookings.length, 'tables:', tables.length);
+    } catch(e) { console.error('Planner fetch error:', e); }
     finally   { loading = false; }
   }
 
-  $: if (selectedDate) { fetchData(); updateCurrentTimeLine(); }
+  // Reactive block depends on selectedDate and restaurantId to handle Mount updates properly
+  $: if (selectedDate && restaurantId) { 
+    fetchData(); 
+    updateCurrentTimeLine(); 
+  }
 
   onMount(() => {
     const sid = localStorage.getItem('admin_restaurant_id');
-    if (sid) restaurantId = sid;
+    if (sid) {
+      restaurantId = sid;
+    } else {
+      restaurantId = '11111111-1111-1111-1111-111111111111';
+      localStorage.setItem('admin_restaurant_id', restaurantId);
+    }
+    
     updateCurrentTimeLine();
     clockInterval = setInterval(updateCurrentTimeLine, 30_000);
+    
     subscription = supabase
       .channel('planner')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, fetchData)
@@ -221,7 +235,7 @@
 
   <!-- ─── GRID ─── -->
   <div class="flex-1 overflow-auto relative">
-    {#if loading && bookings.length === 0}
+    {#if loading && bookings.length === 0 && tables.length === 0}
       <div class="flex justify-center items-center h-48 text-gray-400">
         <Loader2 class="w-6 h-6 animate-spin mr-2" /> Cargando...
       </div>
@@ -249,6 +263,8 @@
               <span class="text-xs font-semibold text-gray-700 truncate">{table.nombre || `Mesa ${table.id.slice(0,4)}`}</span>
               {#if table.capacidad_min !== undefined && table.capacidad_max !== undefined}
                 <span class="text-[10px] text-gray-400">{table.capacidad_min}–{table.capacidad_max} pax</span>
+              {:else if table.capacidad !== undefined}
+                <span class="text-[10px] text-gray-400">{table.capacidad} pax</span>
               {/if}
             </div>
           {/each}
@@ -270,13 +286,11 @@
                 {@const isHour = slot.endsWith(':00')}
                 <div
                   style="width:{SLOT_WIDTH}px; min-width:{SLOT_WIDTH}px;"
-                  class="border-r {isHour ? 'border-gray-200' : 'border-gray-100'} flex items-end pb-1.5 shrink-0"
+                  class="border-r {isHour ? 'border-gray-200' : 'border-gray-100/50'} flex items-end pb-1.5 shrink-0"
                 >
-                  {#if isHour || slot.endsWith(':30')}
-                    <span class="text-[9px] {isHour ? 'text-gray-500 font-bold' : 'text-gray-400'} pl-1.5">
-                      {slot}
-                    </span>
-                  {/if}
+                  <span class="text-[9px] {isHour ? 'text-gray-500 font-bold' : 'text-gray-400'} pl-1">
+                    {slot}
+                  </span>
                 </div>
               {/each}
             </div>
@@ -288,7 +302,7 @@
               {#if showCurrentTime && currentTimeLeft > 0 && currentTimeLeft < gridWidth}
                 <div class="absolute top-0 bottom-0 z-30 pointer-events-none"
                      style="left:{currentTimeLeft}px; width:2px; background: var(--color-brand, #004aad);">
-                  <div class="w-3 h-3 rounded-full -translate-x-[5px] -translate-y-1 shadow-sm"
+                  <div class="w-3 h-3 rounded-full -translate-x-[5px] -translate-y-1 shadow-sm animate-pulse"
                        style="background: var(--color-brand, #004aad);"></div>
                 </div>
               {/if}
@@ -297,7 +311,7 @@
               {#if bookings.some(b => !b.table_id)}
                 <div class="h-14 border-b border-gray-100 relative bg-gray-50/60">
                   {#each slots as slot, i}
-                    <div class="absolute top-0 h-full border-r {slot.endsWith(':00') ? 'border-gray-200' : 'border-gray-100/80'}"
+                    <div class="absolute top-0 h-full border-r {slot.endsWith(':00') ? 'border-gray-200' : 'border-gray-100/50'}"
                          style="left:{i * SLOT_WIDTH}px; width:{SLOT_WIDTH}px;"></div>
                   {/each}
                   {#each bookingsForTable(null) as booking}
@@ -319,7 +333,7 @@
                 <div class="h-14 border-b border-gray-100 relative {rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}">
                   <!-- Columnas verticales de fondo -->
                   {#each slots as slot, i}
-                    <div class="absolute top-0 h-full border-r {slot.endsWith(':00') ? 'border-gray-200' : 'border-gray-100/80'}"
+                    <div class="absolute top-0 h-full border-r {slot.endsWith(':00') ? 'border-gray-200' : 'border-gray-100/50'}"
                          style="left:{i * SLOT_WIDTH}px; width:{SLOT_WIDTH}px;"></div>
                   {/each}
 
@@ -337,7 +351,7 @@
                   {/each}
 
                   {#if bookingsForTable(table.id).length === 0}
-                    <div class="absolute inset-y-0 left-1 flex items-center">
+                    <div class="absolute inset-y-0 left-2 flex items-center pointer-events-none">
                       <span class="text-[9px] text-gray-300 italic">sin reservas</span>
                     </div>
                   {/if}
