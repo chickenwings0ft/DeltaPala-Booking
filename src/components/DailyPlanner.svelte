@@ -115,6 +115,7 @@
   $: totalActive = bookings.filter(b => !['cancelada'].includes(b.estado)).length;
   $: pendientes  = bookings.filter(b => b.estado === 'pendiente').length;
   $: isToday     = selectedDate === localDateStr(today);
+  $: gridWidth   = slots.length * SLOT_WIDTH;
 
   // ── Carga de datos ────────────────────────────────────────────────────────
   async function fetchData() {
@@ -275,9 +276,6 @@
 
         <!-- Área scrollable horizontal -->
         <div class="overflow-x-auto flex-1">
-          <!-- Total width del grid -->
-          {@const gridWidth = slots.length * SLOT_WIDTH}
-
           <div style="width:{gridWidth}px; min-width:{gridWidth}px;" class="relative">
 
             <!-- Fila de cabecera de horas -->
@@ -341,7 +339,6 @@
 
               <!-- Filas de mesas -->
               {#each tables as table, rowIdx}
-                {@const rowBookings = bookingsForTable(table.id)}
                 <div class="h-14 border-b border-white/5 relative flex items-center {rowIdx % 2 === 0 ? 'bg-[#1a1625]' : 'bg-[#1d1928]'}">
 
                   <!-- Columnas de fondo -->
@@ -354,7 +351,7 @@
                   {/each}
 
                   <!-- Bloques de reservas -->
-                  {#each rowBookings as booking}
+                  {#each bookingsForTable(table.id) as booking}
                     <button
                       class="absolute top-2 bottom-2 rounded-md border-l-2 px-2 text-left flex flex-col justify-center overflow-hidden transition hover:brightness-125 hover:z-10 cursor-pointer {getStatusColor(booking.estado)}"
                       style={getBlockStyle(booking)}
@@ -368,7 +365,7 @@
                   {/each}
 
                   <!-- Placeholder si no hay reservas -->
-                  {#if rowBookings.length === 0}
+                  {#if bookingsForTable(table.id).length === 0}
                     <div class="absolute inset-0 flex items-center" style="left:4px;">
                       <span class="text-[9px] text-gray-700 italic">sin reservas</span>
                     </div>
