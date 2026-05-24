@@ -117,13 +117,13 @@
       const [bRes, tRes] = await Promise.all([
         supabase
           .from('bookings')
-          .select('*, client:client_id(nombre, telefono, email), table:table_id(zona, nombre)')
+          .select('*, client:client_id(nombre, telefono, email), table:table_id(zona, capacidad)')
           .eq('restaurant_id', rid)
           .eq('fecha', selectedDate)
           .order('hora', { ascending: true }),
         supabase
           .from('tables')
-          .select('id, zona, nombre, capacidad_min, capacidad_max')
+          .select('id, zona, capacidad')
           .eq('restaurant_id', rid)
           .order('zona')
       ]);
@@ -260,10 +260,8 @@
           <!-- Mesas -->
           {#each tables as table, i}
             <div class="h-14 border-b border-gray-100 flex flex-col justify-center px-3 {i % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'}">
-              <span class="text-xs font-semibold text-gray-700 truncate">{table.nombre || `Mesa ${table.id.slice(0,4)}`}</span>
-              {#if table.capacidad_min !== undefined && table.capacidad_max !== undefined}
-                <span class="text-[10px] text-gray-400">{table.capacidad_min}–{table.capacidad_max} pax</span>
-              {:else if table.capacidad !== undefined}
+              <span class="text-xs font-semibold text-gray-700 truncate">{table.zona} (Mesa {table.id.slice(0,4)})</span>
+              {#if table.capacidad !== undefined}
                 <span class="text-[10px] text-gray-400">{table.capacidad} pax</span>
               {/if}
             </div>

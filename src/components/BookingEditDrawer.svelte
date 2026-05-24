@@ -115,7 +115,7 @@
     // Cargar mesas del restaurante
     const { data: tableData } = await supabase
       .from('tables')
-      .select('id, nombre, zona, capacidad_min, capacidad_max')
+      .select('id, zona, capacidad')
       .eq('restaurant_id', restaurantId)
       .order('zona');
     tables = tableData || [];
@@ -302,7 +302,7 @@
             class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand appearance-none">
             <option value="">Sin asignar</option>
             {#each tables as t}
-              <option value={t.id}>{t.nombre || t.zona} ({t.capacidad_min}–{t.capacidad_max} pax)</option>
+              <option value={t.id}>{t.zona} (Mesa {t.id.substring(0,4)} · {t.capacidad} pax)</option>
             {/each}
           </select>
         </div>
