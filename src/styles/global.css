@@ -7,6 +7,8 @@
   --color-bg-light: #f8f9fc;
 }
 
+@variant dark (&:where(.dark, .dark *));
+
 /* ─── Base ─────────────────────────────────── */
 body {
   background-color: var(--color-bg-light);
@@ -15,6 +17,12 @@ body {
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+.dark body {
+  background-color: #0f172a;
+  color: #f8fafc;
 }
 
 /* ─── Global transitions ────────────────────── */
@@ -29,6 +37,10 @@ a, button, input, select, textarea {
   padding-bottom: 12px;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 24px;
+}
+
+.dark .admin-title {
+  border-color: #334155;
 }
 
 /* ─── Toast notification ────────────────────── */
@@ -85,11 +97,22 @@ a, button, input, select, textarea {
   border: 1px solid #f0f0f5;
   border-left: 3px solid var(--color-brand);
   box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
-  transition: box-shadow 200ms ease;
+  transition: all 300ms ease;
+}
+
+.dark .admin-card {
+  background: #1e293b;
+  border-color: #334155;
+  border-left: 3px solid #38bdf8;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 .admin-card:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.dark .admin-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* ─── Table overflow wrapper ────────────────── */
@@ -110,7 +133,11 @@ a, button, input, select, textarea {
   font-size: 14px;
   color: #4b5563;
   text-decoration: none;
-  transition: background 200ms ease, color 200ms ease, transform 150ms ease;
+  transition: all 200ms ease;
+}
+
+.dark .nav-item {
+  color: #94a3b8;
 }
 
 .nav-item:hover {
@@ -119,10 +146,20 @@ a, button, input, select, textarea {
   transform: translateX(2px);
 }
 
+.dark .nav-item:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
 .nav-item.active {
   background: #e8f0fe;
   color: var(--color-brand);
   font-weight: 600;
+}
+
+.dark .nav-item.active {
+  background: #1e293b;
+  color: #38bdf8;
 }
 
 /* ─── Mobile padding ────────────────────────── */

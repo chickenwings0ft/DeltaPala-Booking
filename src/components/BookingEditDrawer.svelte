@@ -80,13 +80,13 @@
 
   function statusColor(estado: string) {
     const map: Record<string, string> = {
-      pendiente: 'bg-yellow-100 text-yellow-700 border-yellow-300',
-      confirmada: 'bg-brand/10 text-brand border-brand/30',
-      reconfirmada: 'bg-blue-100 text-blue-700 border-blue-300',
-      completada: 'bg-green-100 text-green-700 border-green-300',
-      cancelada: 'bg-red-100 text-red-600 border-red-200',
+      pendiente: 'bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-950/40 dark:text-yellow-400 dark:border-yellow-900/60',
+      confirmada: 'bg-brand/10 text-brand border-brand/30 dark:bg-brand/20 dark:text-brand dark:border-brand/40',
+      reconfirmada: 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/60',
+      completada: 'bg-green-100 text-green-700 border-green-300 dark:bg-green-950/40 dark:text-green-400 dark:border-green-900/60',
+      cancelada: 'bg-red-100 text-red-600 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900/60',
     };
-    return map[estado] || 'bg-gray-100 text-gray-600 border-gray-200';
+    return map[estado] || 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-slate-400';
   }
 
   // ── Init ───────────────────────────────────────────────────────────────────
@@ -190,8 +190,6 @@
     const msg = activeTab === 'nota' ? notaInterna : mensajeCliente;
     if (!msg.trim()) return;
     sendingMsg = true;
-    // Aquí se integraría con el sistema de mensajería (email/whatsapp).
-    // Por ahora se guarda en notas_cliente como referencia.
     try {
       if (activeTab === 'nota') {
         const newNota = editNotas ? `${editNotas}\n[Nota interna] ${msg}` : `[Nota interna] ${msg}`;
@@ -200,7 +198,6 @@
         notaInterna = '';
       } else {
         mensajeCliente = '';
-        // Aquí iría el envío por email/whatsapp
         alert('Mensaje enviado al cliente (integración pendiente).');
       }
     } finally { sendingMsg = false; }
@@ -224,63 +221,63 @@
 <!-- Drawer -->
 <div
   transition:fly={{ x: 600, duration: 280 }}
-  class="fixed right-0 top-0 bottom-0 z-50 w-full max-w-3xl bg-white shadow-2xl flex flex-col"
+  class="fixed right-0 top-0 bottom-0 z-50 w-full max-w-3xl bg-white dark:bg-slate-800 shadow-2xl flex flex-col border-l dark:border-slate-700 transition-colors duration-300"
   role="dialog"
   aria-label="Editar reserva"
 >
 
   <!-- ─── HEADER ─── -->
-  <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50 shrink-0">
+  <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/60 shrink-0 transition-colors duration-300">
     <div>
-      <h2 class="text-xl font-extrabold text-gray-900">Editar reserva</h2>
-      <p class="text-xs text-gray-500 mt-0.5">ID: {booking?.id?.substring(0,8)}…</p>
+      <h2 class="text-xl font-extrabold text-gray-900 dark:text-slate-100">Editar reserva</h2>
+      <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">ID: {booking?.id?.substring(0,8)}…</p>
     </div>
     <div class="flex items-center gap-3">
       <!-- Badge de estado -->
       <span class="px-3 py-1 rounded-full text-xs font-bold uppercase border {statusColor(editEstado)}">
         {editEstado}
       </span>
-      <button on:click={onClose} class="p-2 rounded-lg hover:bg-gray-200 transition text-gray-500">
+      <button on:click={onClose} class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition text-gray-500 dark:text-slate-400">
         <X class="w-5 h-5" />
       </button>
     </div>
   </div>
 
   <!-- ─── BODY ─── -->
-  <div class="flex-1 overflow-hidden flex">
+  <div class="flex-1 overflow-hidden flex text-gray-800 dark:text-slate-200">
 
     <!-- LEFT: formulario principal -->
-    <div class="flex-1 overflow-y-auto p-6 space-y-5 border-r border-gray-100">
+    <div class="flex-1 overflow-y-auto p-6 space-y-5 border-r border-gray-100 dark:border-slate-700">
 
       <!-- Fecha / Hora / Personas -->
       <div class="grid grid-cols-3 gap-4">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Fecha</label>
+          <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Fecha</label>
           <input
             type="date"
             bind:value={editFecha}
-            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand"
+            class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand text-gray-900 dark:text-slate-100"
           />
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Hora</label>
+          <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Hora</label>
           <input
             type="time"
             bind:value={editHora}
             on:change={recalcEndTime}
-            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand"
+            class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand text-gray-900 dark:text-slate-100"
           />
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Personas</label>
+          <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Personas</label>
           <div class="flex items-center gap-2">
             <button type="button"
               on:click={() => editComensales = Math.max(1, editComensales - 1)}
-              class="w-9 h-9 rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-100 text-gray-600 font-bold transition">−</button>
-            <span class="flex-1 text-center font-bold text-gray-900 text-lg">{editComensales}</span>
+              class="w-9 h-9 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 font-bold transition">−</button>
+            <span class="flex-1 text-center font-bold text-gray-900 dark:text-slate-100 text-lg">{editComensales}</span>
             <button type="button"
               on:click={() => editComensales = editComensales + 1}
-              class="w-9 h-9 rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-100 text-gray-600 font-bold transition">+</button>
+              class="w-9 h-9 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 font-bold transition">+</button>
           </div>
         </div>
       </div>
@@ -288,18 +285,18 @@
       <!-- Duración / Mesa -->
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Duración</label>
+          <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Duración</label>
           <select bind:value={editDuracion} on:change={recalcEndTime}
-            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand appearance-none">
+            class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand text-gray-900 dark:text-slate-100 appearance-none">
             {#each DURACIONES as d}
               <option value={d}>{d} min ({Math.floor(d/60)}h{d%60 > 0 ? ` ${d%60}min` : ''})</option>
             {/each}
           </select>
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Mesa asignada</label>
+          <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Mesa asignada</label>
           <select bind:value={editTableId}
-            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand appearance-none">
+            class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand text-gray-900 dark:text-slate-100 appearance-none">
             <option value="">Sin asignar</option>
             {#each tables as t}
               <option value={t.id}>{t.zona} (Mesa {t.id.substring(0,4)} · {t.capacidad} pax)</option>
@@ -308,56 +305,56 @@
         </div>
       </div>
 
-      <hr class="border-gray-100" />
+      <hr class="border-gray-100 dark:border-slate-700" />
 
       <!-- Datos del cliente -->
       <div>
-        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+        <h3 class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
           <Users class="w-3.5 h-3.5" /> Datos del cliente
         </h3>
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-semibold text-gray-500 mb-1">Nombre completo</label>
+            <label class="block text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1">Nombre completo</label>
             <input type="text" bind:value={editNombre}
-              class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand" />
+              class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand text-gray-900 dark:text-slate-100" />
             {#if clientHistory.length > 0}
-              <p class="text-[10px] text-gray-400 mt-1">
+              <p class="text-[10px] text-gray-400 dark:text-slate-500 mt-1">
                 🕐 {clientHistory.length + 1} reservas en total · Último: {new Date(clientHistory[0].fecha).toLocaleDateString('es-ES')}
               </p>
             {/if}
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1"><Phone class="w-3 h-3" /> Teléfono</label>
+              <label class="block text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1 flex items-center gap-1"><Phone class="w-3 h-3" /> Teléfono</label>
               <input type="tel" bind:value={editTelefono}
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand" />
+                class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand text-gray-900 dark:text-slate-100" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1"><Mail class="w-3 h-3" /> Email</label>
+              <label class="block text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1 flex items-center gap-1"><Mail class="w-3 h-3" /> Email</label>
               <input type="email" bind:value={editEmail}
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand" />
+                class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand text-gray-900 dark:text-slate-100" />
             </div>
           </div>
         </div>
       </div>
 
-      <hr class="border-gray-100" />
+      <hr class="border-gray-100 dark:border-slate-700" />
 
       <!-- Estado / Origen -->
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Estado</label>
+          <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Estado</label>
           <select bind:value={editEstado}
-            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand appearance-none capitalize">
+            class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand text-gray-900 dark:text-slate-100 appearance-none capitalize">
             {#each ESTADOS as e}
               <option value={e}>{e}</option>
             {/each}
           </select>
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Fuente</label>
+          <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Fuente</label>
           <select bind:value={editOrigen}
-            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand appearance-none capitalize">
+            class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand text-gray-900 dark:text-slate-100 appearance-none capitalize">
             {#each ORIGENES as o}
               <option value={o}>{o}</option>
             {/each}
@@ -367,21 +364,21 @@
 
       <!-- Notas / Peticiones -->
       <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Peticiones especiales / Notas</label>
+        <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Peticiones especiales / Notas</label>
         <textarea bind:value={editNotas} rows="3"
-          class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand resize-none"
+          class="w-full bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand text-gray-900 dark:text-slate-100 resize-none placeholder-gray-400 dark:placeholder-gray-500"
           placeholder="Alergias, peticiones especiales, ocasión especial..."></textarea>
       </div>
 
       <!-- Enlace de cancelación -->
-      <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 text-xs text-gray-500">
-        <span class="font-semibold">Enlace de cancelación:</span>
-        <code class="flex-1 truncate text-brand text-[11px]">
+      <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-900/30 rounded-lg border border-gray-100 dark:border-slate-700 text-xs text-gray-500">
+        <span class="font-semibold dark:text-slate-400">Enlace de cancelación:</span>
+        <code class="flex-1 truncate text-brand dark:text-brand text-[11px]">
           {`/cancelar/${booking?.id}`}
         </code>
         <button
           on:click={() => navigator.clipboard.writeText(`https://delta-pala-booking-seven.vercel.app/cancelar/${booking?.id}`)}
-          class="px-2 py-1 bg-white border border-gray-200 rounded text-gray-600 hover:bg-gray-100 transition font-medium">
+          class="px-2 py-1 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-650 transition font-medium">
           Copiar
         </button>
       </div>
@@ -389,12 +386,12 @@
       <!-- Historial de reservas del cliente -->
       {#if clientHistory.length > 0}
         <div>
-          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Historial del cliente</h3>
+          <h3 class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-2">Historial del cliente</h3>
           <div class="space-y-1.5">
             {#each clientHistory as h}
-              <div class="flex items-center justify-between text-xs bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
-                <span class="text-gray-600">{new Date(h.fecha).toLocaleDateString('es-ES')} · {h.hora?.substring(0,5)}</span>
-                <span class="text-gray-500">{h.comensales} pax</span>
+              <div class="flex items-center justify-between text-xs bg-gray-50 dark:bg-slate-900/30 rounded-lg px-3 py-2 border border-gray-100 dark:border-slate-700">
+                <span class="text-gray-600 dark:text-slate-300">{new Date(h.fecha).toLocaleDateString('es-ES')} · {h.hora?.substring(0,5)}</span>
+                <span class="text-gray-500 dark:text-slate-400">{h.comensales} pax</span>
                 <span class="px-1.5 py-0.5 rounded-full font-bold uppercase {statusColor(h.estado)} text-[9px]">{h.estado}</span>
               </div>
             {/each}
@@ -405,20 +402,20 @@
     </div>
 
     <!-- RIGHT: Actividad + mensajes -->
-    <div class="w-72 shrink-0 flex flex-col overflow-hidden bg-gray-50/60">
+    <div class="w-72 shrink-0 flex flex-col overflow-hidden bg-gray-50/60 dark:bg-slate-900/10">
 
       <!-- Actividad -->
-      <div class="p-4 border-b border-gray-100">
-        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Actividad</h3>
+      <div class="p-4 border-b border-gray-100 dark:border-slate-700">
+        <h3 class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-3">Actividad</h3>
         <div class="space-y-2.5">
           {#each activityLog as entry}
             <div class="flex items-start gap-2">
-              <div class="w-6 h-6 rounded-full bg-brand/10 text-brand flex items-center justify-center text-[10px] shrink-0 font-bold">
+              <div class="w-6 h-6 rounded-full bg-brand/10 dark:bg-brand/20 text-brand flex items-center justify-center text-[10px] shrink-0 font-bold">
                 {entry.icon}
               </div>
               <div>
-                <p class="text-xs font-medium text-gray-700">{entry.label}</p>
-                <p class="text-[10px] text-gray-400">{formatRelative(entry.time)}</p>
+                <p class="text-xs font-medium text-gray-700 dark:text-slate-300">{entry.label}</p>
+                <p class="text-[10px] text-gray-400 dark:text-slate-500">{formatRelative(entry.time)}</p>
               </div>
             </div>
           {/each}
@@ -430,29 +427,29 @@
 
       <!-- Tabs: Nota / Mensaje -->
       <div class="flex-1 flex flex-col overflow-hidden">
-        <div class="flex border-b border-gray-100">
+        <div class="flex border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800">
           <button
             on:click={() => activeTab = 'nota'}
-            class="flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition {activeTab === 'nota' ? 'text-brand border-b-2 border-brand bg-white' : 'text-gray-400 hover:text-gray-600'}">
+            class="flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition {activeTab === 'nota' ? 'text-brand border-b-2 border-brand bg-white dark:bg-slate-800' : 'text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300'}">
             <StickyNote class="w-3.5 h-3.5 inline mr-1" />Nota interna
           </button>
           <button
             on:click={() => activeTab = 'mensaje'}
-            class="flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition {activeTab === 'mensaje' ? 'text-brand border-b-2 border-brand bg-white' : 'text-gray-400 hover:text-gray-600'}">
+            class="flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition {activeTab === 'mensaje' ? 'text-brand border-b-2 border-brand bg-white dark:bg-slate-800' : 'text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300'}">
             <MessageSquare class="w-3.5 h-3.5 inline mr-1" />Mensaje
           </button>
         </div>
 
         <div class="flex-1 p-4 flex flex-col gap-3">
           {#if activeTab === 'nota'}
-            <p class="text-[10px] text-gray-400">Las notas internas no se envían al cliente.</p>
+            <p class="text-[10px] text-gray-400 dark:text-slate-500">Las notas internas no se envían al cliente.</p>
             <textarea bind:value={notaInterna} rows="5"
-              class="flex-1 w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-brand resize-none"
+              class="flex-1 w-full bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-brand text-gray-900 dark:text-slate-100 resize-none"
               placeholder="Escribe una nota interna..."></textarea>
           {:else}
-            <p class="text-[10px] text-gray-400">El mensaje se enviará al email del cliente.</p>
+            <p class="text-[10px] text-gray-400 dark:text-slate-500">El mensaje se enviará al email del cliente.</p>
             <textarea bind:value={mensajeCliente} rows="5"
-              class="flex-1 w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-brand resize-none"
+              class="flex-1 w-full bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-brand text-gray-900 dark:text-slate-100 resize-none"
               placeholder="Mensaje para {editNombre}..."></textarea>
           {/if}
           <button on:click={sendMessage} disabled={sendingMsg}
@@ -469,10 +466,10 @@
   </div>
 
   <!-- ─── FOOTER ─── -->
-  <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between shrink-0">
+  <div class="px-6 py-4 border-t border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/60 flex items-center justify-between shrink-0 transition-colors duration-300">
     <!-- Cancelar reserva -->
     <button on:click={cancelBooking} disabled={saving || editEstado === 'cancelada'}
-      class="flex items-center gap-2 text-red-600 bg-white border border-red-200 hover:bg-red-50 px-4 py-2.5 rounded-lg text-sm font-semibold transition disabled:opacity-40">
+      class="flex items-center gap-2 text-red-600 bg-white dark:bg-slate-700 border border-red-200 dark:border-slate-650 hover:bg-red-50 dark:hover:bg-red-950/20 px-4 py-2.5 rounded-lg text-sm font-semibold transition disabled:opacity-40">
       <Trash2 class="w-4 h-4" /> Cancelar reserva
     </button>
 
@@ -489,7 +486,7 @@
       {/if}
 
       <button on:click={onClose}
-        class="px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-50 transition">
+        class="px-4 py-2.5 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-200 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">
         Cerrar
       </button>
       <button on:click={saveBooking} disabled={saving}

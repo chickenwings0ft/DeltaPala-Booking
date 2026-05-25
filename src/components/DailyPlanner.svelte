@@ -62,7 +62,6 @@
 
   function getBlockStyle(b: any): string {
     const startMins = timeToMins(b.hora.substring(0, 5));
-    // Default duration to 90 minutes if not specified
     const endMins   = b.end_time ? timeToMins(b.end_time.substring(0, 5)) : startMins + 90;
     const left  = (startMins - START_HOUR * 60) * (SLOT_WIDTH / SLOT_MINUTES);
     const width = Math.max((endMins - startMins) * (SLOT_WIDTH / SLOT_MINUTES) - 3, 20);
@@ -71,24 +70,24 @@
 
   function statusStyle(estado: string) {
     const map: Record<string, string> = {
-      pendiente:    'bg-yellow-100 border-yellow-400 text-yellow-800',
-      confirmada:   'bg-brand/10 border-brand text-brand',
-      reconfirmada: 'bg-blue-100 border-blue-400 text-blue-800',
-      completada:   'bg-green-100 border-green-400 text-green-800',
-      cancelada:    'bg-red-50 border-red-300 text-red-400 opacity-50',
+      pendiente:    'bg-yellow-100 border-yellow-400 text-yellow-800 dark:bg-yellow-950/40 dark:border-yellow-600/60 dark:text-yellow-300',
+      confirmada:   'bg-brand/10 border-brand text-brand dark:bg-brand/20 dark:border-brand/40 dark:text-brand-hover',
+      reconfirmada: 'bg-blue-100 border-blue-400 text-blue-800 dark:bg-blue-950/40 dark:border-blue-600/60 dark:text-blue-300',
+      completada:   'bg-green-100 border-green-400 text-green-800 dark:bg-green-950/40 dark:border-green-600/60 dark:text-green-300',
+      cancelada:    'bg-red-50 border-red-300 text-red-400 opacity-50 dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400',
     };
-    return map[estado] || 'bg-gray-100 border-gray-300 text-gray-600';
+    return map[estado] || 'bg-gray-100 border-gray-300 text-gray-600 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-300';
   }
 
   function statusBadge(estado: string) {
     const map: Record<string, string> = {
-      pendiente:    'bg-yellow-100 text-yellow-700',
-      confirmada:   'bg-brand/10 text-brand',
-      reconfirmada: 'bg-blue-100 text-blue-700',
-      completada:   'bg-green-100 text-green-700',
-      cancelada:    'bg-red-100 text-red-500',
+      pendiente:    'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400',
+      confirmada:   'bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand',
+      reconfirmada: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400',
+      completada:   'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400',
+      cancelada:    'bg-red-100 text-red-500 dark:bg-red-950 dark:text-red-400',
     };
-    return map[estado] || 'bg-gray-100 text-gray-600';
+    return map[estado] || 'bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-400';
   }
 
   function statusIcon(estado: string) {
@@ -134,7 +133,6 @@
     finally   { loading = false; }
   }
 
-  // Reactive block depends on selectedDate and restaurantId to handle Mount updates properly
   $: if (selectedDate && restaurantId) { 
     fetchData(); 
     updateCurrentTimeLine(); 
@@ -166,22 +164,19 @@
   let hoveredBooking: any = null;
 </script>
 
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<!-- PLANIFICADOR — tema admin (blanco, gris, brand)                         -->
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<div class="flex flex-col bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-full">
+<div class="flex flex-col bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden h-full transition-all duration-300">
 
   <!-- ─── HEADER ─── -->
-  <div class="p-4 border-b border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
+  <div class="p-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0 transition-colors duration-300">
 
     <!-- Navegación de fecha -->
     <div class="flex items-center gap-2">
       <button on:click={() => changeDay(-1)}
-        class="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 transition text-gray-500">
+        class="p-1.5 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 transition text-gray-500 dark:text-slate-300">
         <ChevronLeft class="w-4 h-4" />
       </button>
 
-      <h2 class="font-bold text-gray-900 capitalize text-base min-w-[220px] text-center">
+      <h2 class="font-bold text-gray-900 dark:text-slate-100 capitalize text-base min-w-[220px] text-center">
         {formatDateLabel(selectedDate)}
         {#if isToday}
           <span class="ml-2 inline-block text-[10px] bg-brand text-white px-2 py-0.5 rounded-full font-bold uppercase">Hoy</span>
@@ -189,14 +184,14 @@
       </h2>
 
       <button on:click={() => changeDay(1)}
-        class="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 transition text-gray-500">
+        class="p-1.5 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 transition text-gray-500 dark:text-slate-300">
         <ChevronRight class="w-4 h-4" />
       </button>
 
       {#if !isToday}
         <button on:click={() => selectedDate = localDateStr(today)}
           title="Ir a hoy"
-          class="p-1.5 rounded-lg border border-brand/30 bg-brand/5 hover:bg-brand/10 transition text-brand">
+          class="p-1.5 rounded-lg border border-brand/30 bg-brand/5 dark:bg-brand/20 hover:bg-brand/10 transition text-brand">
           <CalendarDays class="w-4 h-4" />
         </button>
       {/if}
@@ -207,16 +202,16 @@
       {#if loading}
         <Loader2 class="w-4 h-4 animate-spin text-gray-400" />
       {:else}
-        <span class="text-sm text-gray-500 flex items-center gap-1.5">
+        <span class="text-sm text-gray-500 dark:text-slate-400 flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-brand inline-block"></span>
-          <strong class="text-gray-900">{totalActive}</strong> reservas
+          <strong class="text-gray-900 dark:text-slate-200">{totalActive}</strong> reservas
         </span>
-        <span class="text-sm text-gray-500 flex items-center gap-1.5">
+        <span class="text-sm text-gray-500 dark:text-slate-400 flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-purple-400 inline-block"></span>
-          <strong class="text-gray-900">{totalPax}</strong> pax
+          <strong class="text-gray-900 dark:text-slate-200">{totalPax}</strong> pax
         </span>
         {#if pendientes > 0}
-          <span class="text-xs font-bold bg-yellow-100 text-yellow-700 px-2.5 py-1 rounded-full">
+          <span class="text-xs font-bold bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300 px-2.5 py-1 rounded-full">
             ⏳ {pendientes} pendiente{pendientes > 1 ? 's' : ''}
           </span>
         {/if}
@@ -225,51 +220,51 @@
   </div>
 
   <!-- ─── LEYENDA ─── -->
-  <div class="flex items-center gap-4 px-4 py-2 border-b border-gray-100 text-[11px] text-gray-500 shrink-0 bg-white flex-wrap">
-    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border border-yellow-400 bg-yellow-100 inline-block"></span>Pendiente</span>
-    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border border-brand bg-brand/10 inline-block"></span>Confirmada</span>
-    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border border-blue-400 bg-blue-100 inline-block"></span>Reconfirmada</span>
-    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border border-green-400 bg-green-100 inline-block"></span>Completada</span>
-    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border border-red-300 bg-red-50 inline-block opacity-60"></span>Cancelada</span>
+  <div class="flex items-center gap-4 px-4 py-2 border-b border-gray-100 dark:border-slate-700 text-[11px] text-gray-500 dark:text-slate-400 shrink-0 bg-white dark:bg-slate-800 flex-wrap transition-colors duration-300">
+    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border border-yellow-400 dark:border-yellow-600 bg-yellow-100 dark:bg-yellow-950/40 inline-block"></span>Pendiente</span>
+    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border border-brand/50 bg-brand/10 inline-block"></span>Confirmada</span>
+    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border border-blue-400 dark:border-blue-600 bg-blue-100 dark:bg-blue-950/40 inline-block"></span>Reconfirmada</span>
+    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border border-green-400 dark:border-green-600 bg-green-100 dark:bg-green-950/40 inline-block"></span>Completada</span>
+    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded border border-red-300 dark:border-red-900 bg-red-50 dark:bg-red-950/20 inline-block opacity-60"></span>Cancelada</span>
   </div>
 
   <!-- ─── GRID ─── -->
   <div class="flex-1 overflow-auto relative">
     {#if loading && bookings.length === 0 && tables.length === 0}
-      <div class="flex justify-center items-center h-48 text-gray-400">
+      <div class="flex justify-center items-center h-48 text-gray-400 dark:text-slate-500">
         <Loader2 class="w-6 h-6 animate-spin mr-2" /> Cargando...
       </div>
     {:else}
       <div class="flex">
 
         <!-- Columna izquierda sticky -->
-        <div class="shrink-0 w-32 border-r border-gray-100 bg-white sticky left-0 z-20">
+        <div class="shrink-0 w-32 border-r border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 sticky left-0 z-20 transition-colors duration-300">
           <!-- Cabecera -->
-          <div class="h-9 border-b border-gray-100 flex items-center px-3 bg-gray-50">
-            <span class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Mesa</span>
+          <div class="h-9 border-b border-gray-100 dark:border-slate-700 flex items-center px-3 bg-gray-50 dark:bg-slate-900/50">
+            <span class="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-widest font-bold">Mesa</span>
           </div>
 
           <!-- Sin mesa asignada -->
           {#if bookings.some(b => !b.table_id)}
-            <div class="h-14 border-b border-gray-100 flex flex-col justify-center px-3 bg-gray-50/60">
-              <span class="text-xs font-semibold text-gray-600">Sin mesa</span>
-              <span class="text-[10px] text-gray-400">No asignada</span>
+            <div class="h-14 border-b border-gray-100 dark:border-slate-700 flex flex-col justify-center px-3 bg-gray-50/60 dark:bg-slate-900/30">
+              <span class="text-xs font-semibold text-gray-600 dark:text-slate-300">Sin mesa</span>
+              <span class="text-[10px] text-gray-400 dark:text-slate-500">No asignada</span>
             </div>
           {/if}
 
           <!-- Mesas -->
           {#each tables as table, i}
-            <div class="h-14 border-b border-gray-100 flex flex-col justify-center px-3 {i % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'}">
-              <span class="text-xs font-semibold text-gray-700 truncate">{table.zona} (Mesa {table.id.slice(0,4)})</span>
+            <div class="h-14 border-b border-gray-100 dark:border-slate-700 flex flex-col justify-center px-3 {i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-gray-50/40 dark:bg-slate-900/10'}">
+              <span class="text-xs font-semibold text-gray-700 dark:text-slate-300 truncate">{table.zona} (Mesa {table.id.slice(0,4)})</span>
               {#if table.capacidad !== undefined}
-                <span class="text-[10px] text-gray-400">{table.capacidad} pax</span>
+                <span class="text-[10px] text-gray-400 dark:text-slate-500">{table.capacidad} pax</span>
               {/if}
             </div>
           {/each}
 
           {#if tables.length === 0 && !bookings.some(b => !b.table_id)}
             <div class="h-14 flex items-center px-3">
-              <span class="text-[10px] text-gray-400 italic">Sin mesas</span>
+              <span class="text-[10px] text-gray-400 dark:text-slate-500 italic">Sin mesas</span>
             </div>
           {/if}
         </div>
@@ -279,14 +274,14 @@
           <div style="width:{gridWidth}px; min-width:{gridWidth}px;" class="relative">
 
             <!-- Cabecera de horas -->
-            <div class="flex h-9 border-b border-gray-100 bg-gray-50 sticky top-0 z-10">
+            <div class="flex h-9 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 sticky top-0 z-10 transition-colors duration-300">
               {#each slots as slot, i}
                 {@const isHour = slot.endsWith(':00')}
                 <div
                   style="width:{SLOT_WIDTH}px; min-width:{SLOT_WIDTH}px;"
-                  class="border-r {isHour ? 'border-gray-200' : 'border-gray-100/50'} flex items-end pb-1.5 shrink-0"
+                  class="border-r {isHour ? 'border-gray-200 dark:border-slate-700' : 'border-gray-100/50 dark:border-slate-700/50'} flex items-end pb-1.5 shrink-0"
                 >
-                  <span class="text-[9px] {isHour ? 'text-gray-500 font-bold' : 'text-gray-400'} pl-1">
+                  <span class="text-[9px] {isHour ? 'text-gray-500 dark:text-slate-400 font-bold' : 'text-gray-400 dark:text-slate-500'} pl-1">
                     {slot}
                   </span>
                 </div>
@@ -307,9 +302,9 @@
 
               <!-- Fila Sin Mesa -->
               {#if bookings.some(b => !b.table_id)}
-                <div class="h-14 border-b border-gray-100 relative bg-gray-50/60">
+                <div class="h-14 border-b border-gray-100 dark:border-slate-700 relative bg-gray-50/60 dark:bg-slate-900/20">
                   {#each slots as slot, i}
-                    <div class="absolute top-0 h-full border-r {slot.endsWith(':00') ? 'border-gray-200' : 'border-gray-100/50'}"
+                    <div class="absolute top-0 h-full border-r {slot.endsWith(':00') ? 'border-gray-200 dark:border-slate-700' : 'border-gray-100/50 dark:border-slate-700/30'}"
                          style="left:{i * SLOT_WIDTH}px; width:{SLOT_WIDTH}px;"></div>
                   {/each}
                   {#each bookingsForTable(null) as booking}
@@ -328,10 +323,10 @@
 
               <!-- Filas de mesas -->
               {#each tables as table, rowIdx}
-                <div class="h-14 border-b border-gray-100 relative {rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}">
+                <div class="h-14 border-b border-gray-100 dark:border-slate-700 relative {rowIdx % 2 === 0 ? 'bg-white dark:bg-slate-800/40' : 'bg-gray-50/30 dark:bg-slate-900/10'}">
                   <!-- Columnas verticales de fondo -->
                   {#each slots as slot, i}
-                    <div class="absolute top-0 h-full border-r {slot.endsWith(':00') ? 'border-gray-200' : 'border-gray-100/50'}"
+                    <div class="absolute top-0 h-full border-r {slot.endsWith(':00') ? 'border-gray-200 dark:border-slate-700' : 'border-gray-100/50 dark:border-slate-700/30'}"
                          style="left:{i * SLOT_WIDTH}px; width:{SLOT_WIDTH}px;"></div>
                   {/each}
 
@@ -350,7 +345,7 @@
 
                   {#if bookingsForTable(table.id).length === 0}
                     <div class="absolute inset-y-0 left-2 flex items-center pointer-events-none">
-                      <span class="text-[9px] text-gray-300 italic">sin reservas</span>
+                      <span class="text-[9px] text-gray-300 dark:text-slate-600 italic">sin reservas</span>
                     </div>
                   {/if}
                 </div>
@@ -358,8 +353,8 @@
 
               <!-- Empty state -->
               {#if tables.length === 0 && !bookings.some(b => !b.table_id)}
-                <div class="h-40 flex flex-col items-center justify-center text-gray-400 text-sm gap-2">
-                  <CalendarDays class="w-8 h-8 text-gray-200" />
+                <div class="h-40 flex flex-col items-center justify-center text-gray-400 dark:text-slate-500 text-sm gap-2">
+                  <CalendarDays class="w-8 h-8 text-gray-200 dark:text-slate-700" />
                   <p>No hay mesas configuradas.</p>
                 </div>
               {/if}
@@ -373,29 +368,29 @@
 
   <!-- ─── TOOLTIP ─── -->
   {#if hoveredBooking}
-    <div class="border-t border-gray-100 bg-gray-50 px-5 py-3 flex items-center gap-6 text-sm shrink-0">
+    <div class="border-t border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/60 px-5 py-3 flex items-center gap-6 text-sm shrink-0 text-gray-800 dark:text-slate-200 transition-colors duration-300">
       <div>
-        <p class="font-bold text-gray-900">{hoveredBooking.client?.nombre || 'Sin nombre'}</p>
-        <p class="text-xs text-gray-500">{hoveredBooking.client?.telefono || '—'}</p>
+        <p class="font-bold text-gray-900 dark:text-slate-100">{hoveredBooking.client?.nombre || 'Sin nombre'}</p>
+        <p class="text-xs text-gray-500 dark:text-slate-400">{hoveredBooking.client?.telefono || '—'}</p>
       </div>
       <div>
-        <p class="text-[10px] text-gray-400 uppercase tracking-wider">Hora</p>
-        <p class="font-semibold text-gray-800">{hoveredBooking.hora?.substring(0,5)}</p>
+        <p class="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider">Hora</p>
+        <p class="font-semibold text-gray-800 dark:text-slate-200">{hoveredBooking.hora?.substring(0,5)}</p>
       </div>
       <div>
-        <p class="text-[10px] text-gray-400 uppercase tracking-wider">Pax</p>
-        <p class="font-semibold text-gray-800">{hoveredBooking.comensales}</p>
+        <p class="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider">Pax</p>
+        <p class="font-semibold text-gray-800 dark:text-slate-200">{hoveredBooking.comensales}</p>
       </div>
       <div>
-        <p class="text-[10px] text-gray-400 uppercase tracking-wider">Estado</p>
+        <p class="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider">Estado</p>
         <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase {statusBadge(hoveredBooking.estado)}">
           {hoveredBooking.estado}
         </span>
       </div>
       {#if hoveredBooking.client?.email}
         <div class="ml-auto">
-          <p class="text-[10px] text-gray-400 uppercase tracking-wider">Email</p>
-          <p class="text-xs text-gray-600">{hoveredBooking.client.email}</p>
+          <p class="text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider">Email</p>
+          <p class="text-xs text-gray-600 dark:text-slate-300">{hoveredBooking.client.email}</p>
         </div>
       {/if}
     </div>
